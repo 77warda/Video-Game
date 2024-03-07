@@ -18,7 +18,7 @@
 </div>
 
 <div class="games">
-  <!-- <ng-container *ngFor="let game of games">
+  <ng-container *ngFor="let game of games">
     <div class="game" (click)="openGameDetails(game.id)">
       <div class="game-thumb-container">
         <img
@@ -35,14 +35,16 @@
           <img
             *ngFor="let gamePlatform of game.parent_platforms"
             class="game-platform"
-            src="assets/images/platforms/{{ gamePlatform.platform.slug }}.svg"
+            src="../../assets/images/platforms/{{
+              gamePlatform.platform.slug
+            }}.svg"
             alt="{{ gamePlatform.platform.slug }}"
           />
         </div>
       </div>
     </div>
-  </ng-container> -->
-  <ng-container>
+  </ng-container>
+  <!-- <ng-container>
     <div class="game">
       <div class="game-thumb-container">
         <img
@@ -62,5 +64,5 @@
         </div>
       </div>
     </div>
-  </ng-container>
+  </ng-container> -->
 </div>

@@ -1,6 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { HttpService } from '../services/http.service';
+import { APIResponse, Game } from '../models';
 
 @Component({
   selector: 'video-game-db-home',
@@ -9,13 +11,12 @@ import { Subscription } from 'rxjs';
 })
 export class HomeComponent implements OnInit, OnDestroy {
   public sort!: string;
-  // public games!: Array<Game>;
-  public games!: Array<any>;
+  public games!: Array<Game>;
   private routeSub!: Subscription;
   private gameSub!: Subscription;
 
   constructor(
-    // private httpService: HttpService,
+    private httpService: HttpService,
     private router: Router,
     private activatedRoute: ActivatedRoute
   ) {}
@@ -31,12 +32,12 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   searchGames(sort: string, search?: string): void {
-    // this.gameSub = this.httpService
-    //   .getGameList(sort, search)
-    //   .subscribe((gameList: APIResponse<Game>) => {
-    //     this.games = gameList.results;
-    //     console.log(gameList);
-    //   });
+    this.gameSub = this.httpService
+      .getGameList(sort, search)
+      .subscribe((gameList: APIResponse<Game>) => {
+        this.games = gameList.results;
+        console.log(gameList);
+      });
   }
 
   openGameDetails(id: string): void {
