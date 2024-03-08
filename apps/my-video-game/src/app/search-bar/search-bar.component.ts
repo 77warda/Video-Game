@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators, NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 
 @Component({
@@ -18,7 +18,10 @@ export class SearchBarComponent implements OnInit {
   }
 
   onSubmit() {
-    // this.router.navigate(['search', form.value.search]);
+    const searchValue = this.searchForm.get('search')?.value;
+    if (searchValue) {
+      this.router.navigate(['search', searchValue]);
+    }
     console.log(this.searchForm.value);
   }
 }

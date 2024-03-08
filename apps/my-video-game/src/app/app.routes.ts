@@ -4,6 +4,6 @@ import { DetailsComponent } from './details/details.component';
 
 export const appRoutes: Route[] = [
   { path: '', component: HomeComponent },
-  { path: 'search/:game-search', component: DetailsComponent },
+  { path: 'search/:game-search', component: HomeComponent },
   { path: 'details/:id', component: DetailsComponent },
 ];

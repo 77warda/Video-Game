@@ -9,7 +9,7 @@ import { HttpService } from '../services/http.service';
   templateUrl: './details.component.html',
   styleUrls: ['./details.component.scss'],
 })
-export class DetailsComponent implements OnInit, OnDestroy {
+export class DetailsComponent implements OnInit {
   gameRating = 0;
   gameId!: string;
   game!: Game;
@@ -26,12 +26,9 @@ export class DetailsComponent implements OnInit, OnDestroy {
       this.gameId = params['id'];
       this.getGameDetails(this.gameId);
     });
-    console.log('game is', this.game);
   }
 
   getGameDetails(id: string): void {
-    console.log('game is', id);
-
     this.gameSub = this.httpService
       .getGameDetails(id)
       .subscribe((gameResp: Game) => {
@@ -41,7 +38,6 @@ export class DetailsComponent implements OnInit, OnDestroy {
           this.gameRating = this.game.metacritic;
         }, 1000);
       });
-    console.log('game are', this.game);
   }
 
   getColor(value: number): string {

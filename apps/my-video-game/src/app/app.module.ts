@@ -9,13 +9,14 @@ import { appRoutes } from './app.routes';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { GaugeModule } from 'angular-gauge';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
-import { MatTabsModule } from '@angular/material/tabs';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { HttpErrorsInterceptor } from './interceptors/http-errors.interceptor';
 import { HttpHeadersInterceptor } from './interceptors/http-headers.interceptor';
 import { DetailsComponent } from './details/details.component';
+import { GameTabsComponent } from './game-tabs/game-tabs.component';
+import { MatTabsModule } from '@angular/material/tabs';
 
 @NgModule({
   declarations: [
@@ -23,6 +24,7 @@ import { DetailsComponent } from './details/details.component';
     SearchBarComponent,
     HomeComponent,
     DetailsComponent,
+    GameTabsComponent,
   ],
   imports: [
     BrowserModule,
@@ -31,11 +33,11 @@ import { DetailsComponent } from './details/details.component';
     RouterModule.forRoot(appRoutes, { initialNavigation: 'enabledBlocking' }),
     BrowserAnimationsModule,
     HttpClientModule,
-    MatTabsModule,
     MatIconModule,
     MatSelectModule,
     MatFormFieldModule,
     GaugeModule.forRoot(),
+    MatTabsModule,
   ],
   providers: [
     {

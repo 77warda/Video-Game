@@ -1,7 +1,8 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { forkJoin, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment as env } from '../environments/environment';
-import { Observable, forkJoin, map } from 'rxjs';
 import { APIResponse, Game } from '../models';
 
 @Injectable({
