@@ -17,6 +17,11 @@ import { HttpHeadersInterceptor } from './interceptors/http-headers.interceptor'
 import { DetailsComponent } from './details/details.component';
 import { GameTabsComponent } from './game-tabs/game-tabs.component';
 import { MatTabsModule } from '@angular/material/tabs';
+import { StoreModule } from '@ngrx/store';
+import { EffectsModule } from '@ngrx/effects';
+import * as videoGame from './+state/game/game.reducer';
+import { GameEffects } from './+state/game/game.effects';
+import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 
 @NgModule({
   declarations: [
@@ -38,6 +43,12 @@ import { MatTabsModule } from '@angular/material/tabs';
     MatFormFieldModule,
     GaugeModule.forRoot(),
     MatTabsModule,
+    StoreDevtoolsModule.instrument(),
+    StoreModule,
+    StoreModule.forRoot({}),
+    StoreModule.forFeature(videoGame.GAME_FEATURE_KEY, videoGame.gameReducer),
+    EffectsModule.forFeature([GameEffects]),
+    EffectsModule.forRoot([GameEffects]),
   ],
   providers: [
     {

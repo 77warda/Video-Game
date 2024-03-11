@@ -1,8 +1,11 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { HttpService } from '../services/http.service';
 import { APIResponse, Game } from '../models';
+import { Store } from '@ngrx/store';
+import { selectGames } from '../+state/game/game.selectors';
+import { GameActions } from '../+state/game/game.actions';
 
 @Component({
   selector: 'video-game-db-home',
@@ -11,17 +14,21 @@ import { APIResponse, Game } from '../models';
 })
 export class HomeComponent implements OnInit, OnDestroy {
   public sort!: string;
-  public games!: Array<Game>;
+  // public games!: Array<Game>;
   private routeSub!: Subscription;
-  private gameSub!: Subscription;
-
+  // private gameSub!: Subscription;
+  games$!: Observable<any>;
   constructor(
-    private httpService: HttpService,
     private router: Router,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    private store: Store
   ) {}
 
   ngOnInit(): void {
+    this.games$ = this.store.select(selectGames);
+    // this.games$.subscribe((cat) => {
+    //   console.log('All games:', cat);
+    // });
     this.routeSub = this.activatedRoute.params.subscribe((params: Params) => {
       if (params['game-search']) {
         this.searchGames('metacrit', params['game-search']);
@@ -32,12 +39,13 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   searchGames(sort: string, search?: string): void {
-    this.gameSub = this.httpService
-      .getGameList(sort, search)
-      .subscribe((gameList: APIResponse<Game>) => {
-        this.games = gameList.results;
-        console.log(gameList);
-      });
+    // this.gameSub = this.httpService
+    //   .getGameList(sort, search)
+    //   .subscribe((gameList: APIResponse<Game>) => {
+    //     this.games = gameList.results;
+    //     console.log(gameList.results);
+    //   });
+    this.store.dispatch(GameActions.searchGames({ sort, search }));
   }
 
   openGameDetails(id: string): void {
@@ -45,9 +53,10 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.gameSub) {
-      this.gameSub.unsubscribe();
-    }
+    // if (this.gameSub) {
+    //   this.gameSub.unsubscribe();
+    //   console.log('destroy');
+    // }
 
     if (this.routeSub) {
       this.routeSub.unsubscribe();
