@@ -3,9 +3,9 @@ import { Router, ActivatedRoute, Params } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
 import { HttpService } from '../services/http.service';
 import { APIResponse, Game } from '../models';
-import { Store } from '@ngrx/store';
-import { selectGames } from '../+state/game/game.selectors';
-import { GameActions } from '../+state/game/game.actions';
+import { Store, select } from '@ngrx/store';
+import { selectGames, selectLoading } from '../+state/game/game.selectors';
+import { GamePageActions, GameApiActions } from '../+state/game/game.actions';
 
 @Component({
   selector: 'video-game-db-home',
@@ -18,6 +18,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   private routeSub!: Subscription;
   // private gameSub!: Subscription;
   games$!: Observable<any>;
+  loading$!: Observable<boolean>;
   constructor(
     private router: Router,
     private activatedRoute: ActivatedRoute,
@@ -26,6 +27,12 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.games$ = this.store.select(selectGames);
+    this.loading$ = this.store.pipe(select(selectLoading));
+    // this.store.pipe(select(selectGames)).subscribe((games) => {
+    //   if (!games) {
+    //     this.store.dispatch(GameActions.loadGames());
+    //   }
+    // });
     // this.games$.subscribe((cat) => {
     //   console.log('All games:', cat);
     // });
@@ -45,7 +52,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     //     this.games = gameList.results;
     //     console.log(gameList.results);
     //   });
-    this.store.dispatch(GameActions.searchGames({ sort, search }));
+    this.store.dispatch(GamePageActions.loadGames({ sort, search }));
   }
 
   openGameDetails(id: string): void {

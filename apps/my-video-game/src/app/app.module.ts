@@ -22,6 +22,8 @@ import { EffectsModule } from '@ngrx/effects';
 import * as videoGame from './+state/game/game.reducer';
 import { GameEffects } from './+state/game/game.effects';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 @NgModule({
   declarations: [
@@ -43,12 +45,14 @@ import { StoreDevtoolsModule } from '@ngrx/store-devtools';
     MatFormFieldModule,
     GaugeModule.forRoot(),
     MatTabsModule,
-    StoreDevtoolsModule.instrument(),
+    MatProgressSpinnerModule,
+    MatSnackBarModule,
     StoreModule,
     StoreModule.forRoot({}),
     StoreModule.forFeature(videoGame.GAME_FEATURE_KEY, videoGame.gameReducer),
     EffectsModule.forFeature([GameEffects]),
     EffectsModule.forRoot([GameEffects]),
+    StoreDevtoolsModule.instrument({ maxAge: 25 }),
   ],
   providers: [
     {

@@ -1,21 +1,18 @@
 import { createActionGroup, emptyProps, props } from '@ngrx/store';
 import { Game } from '../../models';
 
-export const GameActions = createActionGroup({
-  source: 'Games',
+export const GamePageActions = createActionGroup({
+  source: 'Game Page',
   events: {
     Enter: emptyProps(),
-    'Load Games': emptyProps(),
-    'Search Games': props<{ sort: string; search?: string }>(),
+    'Load Games': props<{ sort: string; search?: string }>(),
   },
 });
 
 export const GameApiActions = createActionGroup({
-  source: 'Games/API',
+  source: 'Game/API',
   events: {
-    'load Game Success': props<{ games: Game[] }>(),
-    'load Game  Failure': props<{ error: any }>(),
-    'search games Success': props<{ games: Game[] }>(),
-    'search games Failure': props<{ error: any }>(),
+    'Load Game Success': props<{ games: Game[] }>(),
+    'Load Game Failure': props<{ error: any }>(),
   },
 });

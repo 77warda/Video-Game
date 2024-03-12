@@ -1,5 +1,5 @@
 import { createReducer, on } from '@ngrx/store';
-import { GameActions, GameApiActions } from './game.actions';
+import { GamePageActions, GameApiActions } from './game.actions';
 import { Game } from '../../models';
 
 export const GAME_FEATURE_KEY = 'video-game';
@@ -18,7 +18,7 @@ const initialState: GameState = {
 
 export const gameReducer = createReducer(
   initialState,
-  on(GameActions.loadGames, (state) => ({
+  on(GamePageActions.loadGames, (state) => ({
     ...state,
     loading: true,
   })),
@@ -29,18 +29,6 @@ export const gameReducer = createReducer(
     error: null,
   })),
   on(GameApiActions.loadGameFailure, (state, { error }) => ({
-    ...state,
-    loading: false,
-    error,
-  })),
-  on(GameActions.searchGames, (state) => ({ ...state, loading: true })),
-  on(GameApiActions.searchGamesSuccess, (state, { games }) => ({
-    ...state,
-    games,
-    loading: false,
-    error: null,
-  })),
-  on(GameApiActions.searchGamesFailure, (state, { error }) => ({
     ...state,
     loading: false,
     error,
