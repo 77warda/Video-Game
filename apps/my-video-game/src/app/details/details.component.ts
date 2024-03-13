@@ -1,8 +1,11 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { Game } from '../models';
 import { HttpService } from '../services/http.service';
+import { Store } from '@ngrx/store';
+import { GameActions } from '../+state/game/game.actions';
+import { selectGameDetails } from '../+state/game/game.selectors';
 
 @Component({
   selector: 'video-game-db-details',
@@ -12,34 +15,27 @@ import { HttpService } from '../services/http.service';
 export class DetailsComponent implements OnInit {
   gameRating = 0;
   gameId!: string;
-  game!: Game;
+  // game!: Game;
   routeSub!: Subscription;
   gameSub!: Subscription;
+  gameDetails$!: Observable<any>;
 
   constructor(
     private activatedRoute: ActivatedRoute,
-    private httpService: HttpService
+    private httpService: HttpService,
+    private store: Store
   ) {}
 
   ngOnInit(): void {
     this.routeSub = this.activatedRoute.params.subscribe((params: Params) => {
       this.gameId = params['id'];
-      this.getGameDetails(this.gameId);
+      this.store.dispatch(GameActions.loadGameDetails({ id: this.gameId }));
     });
+    this.gameDetails$ = this.store.select(selectGameDetails);
+    // this.gameDetails$.subscribe((cat) => {
+    //   console.log('All games:', cat?.game);
+    // });
   }
-
-  getGameDetails(id: string): void {
-    this.gameSub = this.httpService
-      .getGameDetails(id)
-      .subscribe((gameResp: Game) => {
-        this.game = gameResp;
-
-        setTimeout(() => {
-          this.gameRating = this.game.metacritic;
-        }, 1000);
-      });
-  }
-
   getColor(value: number): string {
     if (value > 75) {
       return '#5ee432';

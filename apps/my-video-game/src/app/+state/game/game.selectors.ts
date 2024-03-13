@@ -21,3 +21,11 @@ export const selectError = createSelector(
   selectGameState,
   (state: GameState) => state.error
 );
+
+export const selectGameDetails = createSelector(
+  selectGameState,
+  (state: GameState) => {
+    console.log(state.details);
+    return state.details.game;
+  }
+);

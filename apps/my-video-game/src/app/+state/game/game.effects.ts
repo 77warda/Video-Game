@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { mergeMap, map, catchError, tap } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { GamePageActions, GameApiActions } from './game.actions';
+import { GameActions, GameApiActions } from './game.actions';
 import { HttpService } from '../../services/http.service';
 import { APIResponse, Game } from '../../models';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -17,20 +17,15 @@ export class GameEffects {
 
   loadGames$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(GamePageActions.loadGames),
-      mergeMap(({ sort, search }) =>
-        this.httpService
-          .getGameList(sort, search)
-          .pipe(
-            map((games) =>
-              GameApiActions.loadGameSuccess({ games: games.results })
-            )
-          )
-      ),
-      catchError((error) => {
-        console.error('Error', error);
-        return of(GameApiActions.loadGameFailure({ error }));
-      })
+      ofType(GameActions.loadGames),
+      mergeMap(() =>
+        this.httpService.getGameList('metacrit').pipe(
+          map((response: APIResponse<Game>) =>
+            GameApiActions.loadGameSuccess({ games: response.results })
+          ),
+          catchError((error) => of(GameApiActions.loadGameFailure({ error })))
+        )
+      )
     )
   );
   handleError$ = createEffect(
@@ -50,19 +45,32 @@ export class GameEffects {
     { dispatch: false }
   );
 
-  // searchGames$ = createEffect(() =>
-  //   this.actions$.pipe(
-  //     ofType(GameActions.searchGames),
-  //     mergeMap(({ sort, search }) =>
-  //       this.httpService.getGameList(sort, search).pipe(
-  //         map((response: APIResponse<Game>) =>
-  //           GameApiActions.searchGamesSuccess({ games: response.results })
-  //         ),
-  //         catchError((error) =>
-  //           of(GameApiActions.searchGamesFailure({ error }))
-  //         )
-  //       )
-  //     )
-  //   )
-  // );
+  searchGames$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(GameActions.searchGames),
+      mergeMap(({ sort, search }) =>
+        this.httpService.getGameList(sort, search).pipe(
+          map((response: APIResponse<Game>) =>
+            GameApiActions.searchGamesSuccess({ games: response.results })
+          ),
+          catchError((error) =>
+            of(GameApiActions.searchGamesFailure({ error }))
+          )
+        )
+      )
+    )
+  );
+  loadGameDetails$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(GameActions.loadGameDetails),
+      mergeMap((action) =>
+        this.httpService.getGameDetails(action.id).pipe(
+          map((game) => GameApiActions.loadGameDetailsSuccess({ game })),
+          catchError((error) =>
+            of(GameApiActions.loadGameDetailsFailure({ error }))
+          )
+        )
+      )
+    )
+  );
 }

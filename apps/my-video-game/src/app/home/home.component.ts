@@ -5,7 +5,7 @@ import { HttpService } from '../services/http.service';
 import { APIResponse, Game } from '../models';
 import { Store, select } from '@ngrx/store';
 import { selectGames, selectLoading } from '../+state/game/game.selectors';
-import { GamePageActions, GameApiActions } from '../+state/game/game.actions';
+import { GameActions, GameApiActions } from '../+state/game/game.actions';
 
 @Component({
   selector: 'video-game-db-home',
@@ -40,7 +40,8 @@ export class HomeComponent implements OnInit, OnDestroy {
       if (params['game-search']) {
         this.searchGames('metacrit', params['game-search']);
       } else {
-        this.searchGames('metacrit');
+        // this.searchGames('metacrit');
+        this.store.dispatch(GameActions.loadGames());
       }
     });
   }
@@ -52,7 +53,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     //     this.games = gameList.results;
     //     console.log(gameList.results);
     //   });
-    this.store.dispatch(GamePageActions.loadGames({ sort, search }));
+    this.store.dispatch(GameActions.searchGames({ sort, search }));
+  }
+  sortGames(sort: string): void {
+    this.store.dispatch(GameActions.sortGames({ sort }));
   }
 
   openGameDetails(id: string): void {
