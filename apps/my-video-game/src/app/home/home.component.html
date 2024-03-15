@@ -57,3 +57,11 @@
     </ng-container>
   </ng-template>
 </div>
+<div>
+  <mat-paginator
+    [length]="totalItems$ | async"
+    [pageSize]="pageSize"
+    (page)="pageChanged($event)"
+  >
+  </mat-paginator>
+</div>

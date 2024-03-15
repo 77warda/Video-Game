@@ -29,3 +29,7 @@ export const selectGameDetails = createSelector(
     return state.details.game;
   }
 );
+export const selectTotalItems = createSelector(selectGameState, (state) => {
+  console.log('count', state?.totalGames);
+  return state?.totalGames;
+});

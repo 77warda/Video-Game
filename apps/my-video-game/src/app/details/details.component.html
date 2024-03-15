@@ -6,20 +6,27 @@
       alt="background image"
     />
   </div>
-  <div class="game-content">
-    <div class="details-wrapper">
-      <div class="game-header">
-        <h1 class="game-header-title">{{ game.name }}</h1>
-        <h2 class="game-header-release-date">
-          Release: {{ game.released | date }}
-        </h2>
-        <p class="game-header-genres">
-          <span *ngFor="let genre of game.genres; let last = last"
-            >{{ genre.name }}<span *ngIf="!last">, </span></span
-          >
-        </p>
-        <div class="game-gauge">
-          <!-- <mwl-gauge
+  <ng-container>
+    <div *ngIf="loading$ | async; else gameDetails">
+      <mat-spinner diameter="72"></mat-spinner>
+      <p>Loading...</p>
+    </div>
+  </ng-container>
+  <ng-template #gameDetails>
+    <div class="game-content">
+      <div class="details-wrapper">
+        <div class="game-header">
+          <h1 class="game-header-title">{{ game.name }}</h1>
+          <h2 class="game-header-release-date">
+            Release: {{ game.released | date }}
+          </h2>
+          <p class="game-header-genres">
+            <span *ngFor="let genre of game.genres; let last = last"
+              >{{ genre.name }}<span *ngIf="!last">, </span></span
+            >
+          </p>
+          <div class="game-gauge">
+            <!-- <mwl-gauge
             class="two"
             [max]="100"
             [dialStartAngle]="180"
@@ -30,17 +37,18 @@
             [animationDuration]="2"
           >
           </mwl-gauge> -->
-          <a
-            class="game-gauge-label"
-            target="_blank"
-            href="{{ game.metacritic_url }}"
-            >Metacritic</a
-          >
+            <a
+              class="game-gauge-label"
+              target="_blank"
+              href="{{ game.metacritic_url }}"
+              >Metacritic</a
+            >
+          </div>
         </div>
+        <video-game-db-game-tabs
+          [game]="gameDetails$ | async"
+        ></video-game-db-game-tabs>
       </div>
-      <video-game-db-game-tabs
-        [game]="gameDetails$ | async"
-      ></video-game-db-game-tabs>
     </div>
-  </div>
+  </ng-template>
 </div>

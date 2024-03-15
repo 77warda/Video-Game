@@ -3,9 +3,12 @@ import { ActivatedRoute, Params } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
 import { Game } from '../models';
 import { HttpService } from '../services/http.service';
-import { Store } from '@ngrx/store';
+import { Store, select } from '@ngrx/store';
 import { GameActions } from '../+state/game/game.actions';
-import { selectGameDetails } from '../+state/game/game.selectors';
+import {
+  selectGameDetails,
+  selectLoading,
+} from '../+state/game/game.selectors';
 
 @Component({
   selector: 'video-game-db-details',
@@ -19,6 +22,7 @@ export class DetailsComponent implements OnInit {
   routeSub!: Subscription;
   gameSub!: Subscription;
   gameDetails$!: Observable<any>;
+  loading$!: Observable<boolean>;
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -32,6 +36,7 @@ export class DetailsComponent implements OnInit {
       this.store.dispatch(GameActions.loadGameDetails({ id: this.gameId }));
     });
     this.gameDetails$ = this.store.select(selectGameDetails);
+    this.loading$ = this.store.pipe(select(selectLoading));
     // this.gameDetails$.subscribe((cat) => {
     //   console.log('All games:', cat?.game);
     // });

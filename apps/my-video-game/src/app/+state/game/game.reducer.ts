@@ -9,12 +9,11 @@ export interface GameState {
   loading: boolean;
   error: any;
   sortCriteria: string;
+  totalGames: number;
   details: DetailsState;
 }
 export interface DetailsState {
   game: Game | null;
-  loading: boolean;
-  error: any;
 }
 
 const initialState: GameState = {
@@ -22,23 +21,23 @@ const initialState: GameState = {
   loading: false,
   error: null,
   sortCriteria: '',
+  totalGames: 0,
   details: {
     game: null,
-    loading: false,
-    error: null,
   },
 };
 
 export const gameReducer = createReducer(
   initialState,
-  on(GameActions.loadGames, (state) => ({
+  on(GameActions.loadGames, GameActions.searchGames, (state) => ({
     ...state,
     loading: true,
   })),
-  on(GameApiActions.loadGameSuccess, (state, { games }) => ({
+  on(GameApiActions.loadGameSuccess, (state, { games, count }) => ({
     ...state,
     games,
     loading: false,
+    totalGames: count,
     error: null,
   })),
   on(GameApiActions.loadGameFailure, (state, { error }) => ({
@@ -46,7 +45,7 @@ export const gameReducer = createReducer(
     loading: false,
     error,
   })),
-  on(GameActions.searchGames, (state) => ({ ...state, loading: true })),
+  // on(GameActions.searchGames, (state) => ({ ...state, loading: true })),
   on(GameApiActions.searchGamesSuccess, (state, { games }) => ({
     ...state,
     games,
@@ -62,28 +61,38 @@ export const gameReducer = createReducer(
     ...state,
     sortCriteria: sort,
   })),
+  on(GameApiActions.sortGamesSuccess, (state, { games }) => ({
+    ...state,
+    games,
+    loading: false,
+    error: null,
+  })),
+  on(GameApiActions.sortGamesFailure, (state, { error }) => ({
+    ...state,
+    loading: false,
+    error,
+  })),
   on(GameActions.loadGameDetails, (state) => ({
     ...state,
+    loading: true,
     details: {
       ...state.details,
-      loading: true,
-      error: null,
     },
   })),
   on(GameApiActions.loadGameDetailsSuccess, (state, { game }) => ({
     ...state,
+    loading: false,
     details: {
       ...state.details,
       game,
-      loading: false,
     },
   })),
   on(GameApiActions.loadGameDetailsFailure, (state, { error }) => ({
     ...state,
+    loading: false,
     details: {
       ...state.details,
       error,
-      loading: false,
     },
   }))
 );

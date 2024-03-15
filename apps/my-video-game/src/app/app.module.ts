@@ -7,7 +7,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { appRoutes } from './app.routes';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { GaugeModule } from 'angular-gauge';
+// import { GaugeModule } from 'angular-gauge';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
@@ -24,6 +24,8 @@ import { GameEffects } from './+state/game/game.effects';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { GaugeModule } from 'angular-gauge';
 
 @NgModule({
   declarations: [
@@ -47,6 +49,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
     MatTabsModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
+    MatPaginatorModule,
     StoreModule,
     StoreModule.forRoot({}),
     StoreModule.forFeature(videoGame.GAME_FEATURE_KEY, videoGame.gameReducer),
