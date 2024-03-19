@@ -12,7 +12,13 @@ export const GameActions = createActionGroup({
     'Load Game Details': props<{ id: string }>(),
     'Next page': emptyProps(),
     'Previous Page': emptyProps(),
-    'Get Games': props<{ sort: string; currentPage: number }>(),
+    'Get Games': props<{
+      sort: string;
+      currentPage: number;
+      search?: string;
+    }>(),
+    'Set Page Size': props<{ pageSize: number }>(),
+    'Set Current Page': props<{ currentPage: number }>(),
   },
 });
 
@@ -21,9 +27,9 @@ export const GameApiActions = createActionGroup({
   events: {
     'Load Game Success': props<{ games: Game[]; count: number }>(),
     'Load Game Failure': props<{ error: any }>(),
-    'search games Success': props<{ games: Game[] }>(),
+    'search games Success': props<{ games: Game[]; count: number }>(),
     'search games Failure': props<{ error: any }>(),
-    'sort games Success': props<{ games: Game[] }>(),
+    'sort games Success': props<{ games: Game[]; count: number }>(),
     'sort games Failure': props<{ error: any }>(),
     'Load Game Details Success': props<{ game: Game }>(),
     'Load Game Details Failure': props<{ error: any }>(),

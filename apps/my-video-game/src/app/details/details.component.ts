@@ -16,19 +16,14 @@ import {
   styleUrls: ['./details.component.scss'],
 })
 export class DetailsComponent implements OnInit {
-  gameRating = 0;
+  // gameRating = 0;
   gameId!: string;
-  // game!: Game;
   routeSub!: Subscription;
   gameSub!: Subscription;
   gameDetails$!: Observable<any>;
   loading$!: Observable<boolean>;
 
-  constructor(
-    private activatedRoute: ActivatedRoute,
-    private httpService: HttpService,
-    private store: Store
-  ) {}
+  constructor(private activatedRoute: ActivatedRoute, private store: Store) {}
 
   ngOnInit(): void {
     this.routeSub = this.activatedRoute.params.subscribe((params: Params) => {
@@ -37,26 +32,23 @@ export class DetailsComponent implements OnInit {
     });
     this.gameDetails$ = this.store.select(selectGameDetails);
     this.loading$ = this.store.pipe(select(selectLoading));
-    // this.gameDetails$.subscribe((cat) => {
-    //   console.log('All games:', cat?.game);
-    // });
   }
-  getColor(value: number): string {
-    if (value > 75) {
-      return '#5ee432';
-    } else if (value > 50) {
-      return '#fffa50';
-    } else if (value > 30) {
-      return '#f7aa38';
-    } else {
-      return '#ef4655';
-    }
-  }
+  // getColor(value: number): string {
+  //   if (value > 75) {
+  //     return '#5ee432';
+  //   } else if (value > 50) {
+  //     return '#fffa50';
+  //   } else if (value > 30) {
+  //     return '#f7aa38';
+  //   } else {
+  //     return '#ef4655';
+  //   }
+  // }
 
   ngOnDestroy(): void {
-    if (this.gameSub) {
-      this.gameSub.unsubscribe();
-    }
+    // if (this.gameSub) {
+    //   this.gameSub.unsubscribe();
+    // }
 
     if (this.routeSub) {
       this.routeSub.unsubscribe();

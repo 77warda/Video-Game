@@ -6,7 +6,6 @@ import { GameActions, GameApiActions } from './game.actions';
 import { HttpService } from '../../services/http.service';
 import { APIResponse, Game } from '../../models';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Store } from '@ngrx/store';
 
 @Injectable()
 export class GameEffects {
@@ -32,11 +31,12 @@ export class GameEffects {
       )
     )
   );
+
   getGames$ = createEffect(() =>
     this.actions$.pipe(
       ofType(GameActions.getGames),
-      mergeMap(({ sort, currentPage }) =>
-        this.httpService.getGameList(sort, currentPage).pipe(
+      mergeMap(({ sort, currentPage, search }) =>
+        this.httpService.getGameList(sort, currentPage, undefined, search).pipe(
           map((response: APIResponse<Game>) =>
             GameApiActions.loadGameSuccess({
               games: response.results,
@@ -74,7 +74,10 @@ export class GameEffects {
           .getGameList(sort, 1, 40, search ? search.toString() : undefined)
           .pipe(
             map((response: APIResponse<Game>) =>
-              GameApiActions.searchGamesSuccess({ games: response.results })
+              GameApiActions.searchGamesSuccess({
+                games: response.results,
+                count: response.count,
+              })
             ),
             catchError((error) =>
               of(GameApiActions.searchGamesFailure({ error }))
@@ -89,7 +92,10 @@ export class GameEffects {
       mergeMap(({ sort }) =>
         this.httpService.getGameList(sort).pipe(
           map((response: APIResponse<Game>) =>
-            GameApiActions.sortGamesSuccess({ games: response.results })
+            GameApiActions.sortGamesSuccess({
+              games: response.results,
+              count: response.count,
+            })
           ),
           catchError((error) => of(GameApiActions.sortGamesFailure({ error })))
         )

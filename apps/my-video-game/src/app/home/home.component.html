@@ -16,52 +16,55 @@
     </mat-select>
   </mat-form-field>
 </div>
-
-<div class="games">
-  <ng-container>
-    <div *ngIf="loading$ | async; else gameSearch">
-      <mat-spinner diameter="72"></mat-spinner>
-      <p>Loading...</p>
-    </div>
-  </ng-container>
-  <ng-template #gameSearch>
-    <ng-container *ngIf="games$ | async as games">
-      <div
-        class="game"
-        *ngFor="let game of games"
-        (click)="openGameDetails(game.id)"
-      >
-        <div class="game-thumb-container">
-          <img
-            *ngIf="game.background_image"
-            [src]="game.background_image"
-            alt="thumbnail"
-            class="game-thumbnail"
-          />
-          <p *ngIf="!game.background_image">No image</p>
-        </div>
-        <div class="game-description">
-          <p class="game-name">{{ game.name }}</p>
-          <div class="game-platforms">
-            <img
-              *ngFor="let gamePlatform of game.parent_platforms"
-              class="game-platform"
-              [src]="
-                'assets/images/platforms/' + gamePlatform.platform.slug + '.svg'
-              "
-              [alt]="gamePlatform.platform.slug"
-            />
-          </div>
-        </div>
+<section *ngIf="allGamesData$ | async as completeGameData">
+  <div class="games">
+    <ng-container>
+      <div *ngIf="completeGameData.loading; else gameSearch">
+        <mat-spinner diameter="72"></mat-spinner>
+        <p>Loading...</p>
       </div>
     </ng-container>
-  </ng-template>
-</div>
-<div>
-  <mat-paginator
-    [length]="totalItems$ | async"
-    [pageSize]="pageSize"
-    (page)="pageChanged($event)"
-  >
-  </mat-paginator>
-</div>
+    <ng-template #gameSearch>
+      <ng-container *ngIf="completeGameData.games">
+        <div
+          class="game"
+          *ngFor="let game of completeGameData.games"
+          (click)="openGameDetails(game.id)"
+        >
+          <div class="game-thumb-container">
+            <img
+              *ngIf="game.background_image"
+              [src]="game.background_image"
+              alt="thumbnail"
+              class="game-thumbnail"
+            />
+            <p *ngIf="!game.background_image">No image</p>
+          </div>
+          <div class="game-description">
+            <p class="game-name">{{ game.name }}</p>
+            <div class="game-platforms">
+              <img
+                *ngFor="let gamePlatform of game.parent_platforms"
+                class="game-platform"
+                [src]="
+                  'assets/images/platforms/' +
+                  gamePlatform.platform.slug +
+                  '.svg'
+                "
+                [alt]="gamePlatform.platform.slug"
+              />
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </ng-template>
+  </div>
+  <div>
+    <mat-paginator
+      [length]="completeGameData.total"
+      [pageSize]="completeGameData.pageSize"
+      (page)="pageChanged($event)"
+    >
+    </mat-paginator>
+  </div>
+</section>
