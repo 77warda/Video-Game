@@ -28,15 +28,15 @@ export class HomeComponent implements OnInit, OnDestroy {
     // this.currentPage$.subscribe((games) => {
     //   console.log('page current:', games);
     // });
-    this.routeSub = this.activatedRoute.params.subscribe((params: Params) => {
-      const page = params['page'];
-      this.currentPage = page ? +page : 1;
-      if (params['game-search']) {
-        this.searchGames('metacrit', params['game-search']);
-      } else {
-        this.store.dispatch(GameActions.loadGames());
-      }
-    });
+    // this.routeSub = this.activatedRoute.params.subscribe((params: Params) => {
+    //   const page = params['page'];
+    //   this.currentPage = page ? +page : 1;
+    //   if (params['game-search']) {
+    //     this.searchGames('metacrit', params['game-search']);
+    //   } else {
+    //     this.store.dispatch(GameActions.loadGames());
+    //   }
+    // });
   }
 
   pageChanged(event: any): void {
@@ -74,9 +74,9 @@ export class HomeComponent implements OnInit, OnDestroy {
       });
   }
 
-  searchGames(sort: string, search?: string): void {
-    this.store.dispatch(GameActions.searchGames({ sort, search }));
-  }
+  // searchGames(sort: string, search?: string): void {
+  //   this.store.dispatch(GameActions.searchGames({ sort, search }));
+  // }
 
   sortGames(sort: string): void {
     this.store.dispatch(GameActions.sortGames({ sort }));
