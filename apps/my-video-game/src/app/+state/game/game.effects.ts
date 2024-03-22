@@ -6,13 +6,15 @@ import { GameActions, GameApiActions } from './game.actions';
 import { HttpService } from '../../services/http.service';
 import { APIResponse, Game } from '../../models';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Store } from '@ngrx/store';
 
 @Injectable()
 export class GameEffects {
   constructor(
     private actions$: Actions,
     private httpService: HttpService,
-    private snackbar: MatSnackBar
+    private snackbar: MatSnackBar,
+    private store: Store
   ) {}
 
   loadGames$ = createEffect(() =>
@@ -29,6 +31,14 @@ export class GameEffects {
           catchError((error) => of(GameApiActions.loadGameFailure({ error })))
         )
       )
+    )
+  );
+
+  nextPage$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(GameActions.nextPage),
+      tap(() => this.store.dispatch(GameActions.nextPageLoading())),
+      mergeMap(() => of(GameActions.nextPageLoadingComplete()))
     )
   );
 
@@ -98,19 +108,6 @@ export class GameEffects {
             })
           ),
           catchError((error) => of(GameApiActions.sortGamesFailure({ error })))
-        )
-      )
-    )
-  );
-  loadGameDetails$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(GameActions.loadGameDetails),
-      mergeMap((action) =>
-        this.httpService.getGameDetails(action.id).pipe(
-          map((game) => GameApiActions.loadGameDetailsSuccess({ game })),
-          catchError((error) =>
-            of(GameApiActions.loadGameDetailsFailure({ error }))
-          )
         )
       )
     )

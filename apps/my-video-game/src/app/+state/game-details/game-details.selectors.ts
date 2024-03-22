@@ -11,22 +11,18 @@ export const selectGameDetailsState = createFeatureSelector<GameDetailsState>(
 export const selectGameDetails = createSelector(
   selectGameDetailsState,
   (state: GameDetailsState) => {
-    console.log(state.details);
-    return state.details.game;
+    console.log(state);
+    return state.gameDetails;
   }
 );
 
-export const selectPageSize = createSelector(
+export const selectLoading = createSelector(
   selectGameDetailsState,
-  (state) => {
-    console.log('page size', state.pageSize);
-    return state.pageSize;
-  }
+  (state: GameDetailsState) => state.loading
 );
-export const selectCurrentPage = createSelector(
-  selectGameDetailsState,
-  (state) => {
-    console.log('selector currentPage', state.currentPage);
-    return state.currentPage;
-  }
+
+export const selectAllGameDetailsData = createSelector(
+  selectGameDetails,
+  selectLoading,
+  (gameDetail, loading) => ({ gameDetail, loading })
 );

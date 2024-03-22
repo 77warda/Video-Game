@@ -19,12 +19,19 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 import * as videoGame from './+state/game/game.reducer';
+import * as gameDetails from './+state/game-details/game-details.reducer';
 import { GameEffects } from './+state/game/game.effects';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { GaugeModule } from 'angular-gauge';
+import { GameDetailsEffects } from './+state/game-details/game-details.effects';
+import {
+  RouterState,
+  StoreRouterConnectingModule,
+  routerReducer,
+} from '@ngrx/router-store';
 
 @NgModule({
   declarations: [
@@ -50,11 +57,16 @@ import { GaugeModule } from 'angular-gauge';
     MatSnackBarModule,
     MatPaginatorModule,
     StoreModule,
-    StoreModule.forRoot({}),
+    StoreModule.forRoot({ router: routerReducer }),
     StoreModule.forFeature(videoGame.GAME_FEATURE_KEY, videoGame.gameReducer),
-    EffectsModule.forFeature([GameEffects]),
-    EffectsModule.forRoot([GameEffects]),
+    StoreModule.forFeature(
+      gameDetails.GAME_DETAILS_FEATURE_KEY,
+      gameDetails.gameDetailsReducer
+    ),
+    EffectsModule.forFeature([GameEffects, GameDetailsEffects]),
+    EffectsModule.forRoot([GameEffects, GameDetailsEffects]),
     StoreDevtoolsModule.instrument({ maxAge: 25 }),
+    StoreRouterConnectingModule.forRoot({ routerState: RouterState.Minimal }),
   ],
   providers: [
     {

@@ -1,27 +1,28 @@
-<div class="details" *ngIf="gameDetails$ | async as game">
-  <div class="game-banner">
-    <img
-      class="game-banner-img"
-      src="{{ game.background_image }}"
-      alt="background image"
-    />
-  </div>
+<div class="details" *ngIf="allGameDetails$ | async as game">
   <ng-container>
-    <div *ngIf="loading$ | async; else gameDetails">
+    <div class="mx-auto" *ngIf="game.loading; else gameDetails">
       <mat-spinner diameter="72"></mat-spinner>
       <p>Loading...</p>
     </div>
   </ng-container>
+
   <ng-template #gameDetails>
+    <div class="game-banner">
+      <img
+        class="game-banner-img"
+        src="{{ game.gameDetail.background_image }}"
+        alt="background image"
+      />
+    </div>
     <div class="game-content">
       <div class="details-wrapper">
         <div class="game-header">
-          <h1 class="game-header-title">{{ game.name }}</h1>
+          <h1 class="game-header-title">{{ game.gameDetail.name }}</h1>
           <h2 class="game-header-release-date">
-            Release: {{ game.released | date }}
+            Release: {{ game.gameDetail.released | date }}
           </h2>
           <p class="game-header-genres">
-            <span *ngFor="let genre of game.genres; let last = last"
+            <span *ngFor="let genre of game.gameDetail.genres; let last = last"
               >{{ genre.name }}<span *ngIf="!last">, </span></span
             >
           </p>
@@ -40,13 +41,13 @@
             <a
               class="game-gauge-label"
               target="_blank"
-              href="{{ game.metacritic_url }}"
+              href="{{ game.gameDetail.metacritic_url }}"
               >Metacritic</a
             >
           </div>
         </div>
         <video-game-db-game-tabs
-          [game]="gameDetails$ | async"
+          [game]="game.gameDetail"
         ></video-game-db-game-tabs>
       </div>
     </div>

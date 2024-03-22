@@ -2,10 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { Observable, Subscription, map } from 'rxjs';
 import { Store, select } from '@ngrx/store';
-import {
-  selectAllGamesData,
-  selectCurrentPage,
-} from '../+state/game/game.selectors';
+import { selectAllGamesData } from '../+state/game/game.selectors';
 import { GameActions } from '../+state/game/game.actions';
 
 @Component({
@@ -14,15 +11,11 @@ import { GameActions } from '../+state/game/game.actions';
   styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent implements OnInit, OnDestroy {
-  public pageSize = 10;
   public currentPage!: number;
   public sort = 'metacrit';
   private routeSub: Subscription | undefined;
 
-  totalItems$!: Observable<number>;
   allGamesData$!: Observable<any>;
-  pageSize$!: Observable<any>;
-  currentPage$!: Observable<any>;
 
   constructor(
     private router: Router,
@@ -32,10 +25,9 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.allGamesData$ = this.store.pipe(select(selectAllGamesData));
-    this.currentPage$ = this.store.pipe(select(selectCurrentPage));
-    this.currentPage$.subscribe((games) => {
-      console.log('page current:', games);
-    });
+    // this.currentPage$.subscribe((games) => {
+    //   console.log('page current:', games);
+    // });
     this.routeSub = this.activatedRoute.params.subscribe((params: Params) => {
       const page = params['page'];
       this.currentPage = page ? +page : 1;
@@ -49,6 +41,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   pageChanged(event: any): void {
     this.currentPage = event.pageIndex + 1;
+    this.store.dispatch(GameActions.nextPage());
 
     this.activatedRoute.paramMap
       .pipe(map((params) => params.get('game-search')))

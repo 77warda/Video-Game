@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { Actions, concatLatestFrom, createEffect, ofType } from '@ngrx/effects';
 import { mergeMap, map, catchError, tap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { HttpService } from '../../services/http.service';
@@ -8,13 +8,20 @@ import {
   GameDetailsActions,
   GameDetailsApiActions,
 } from './game-details.actions';
+import { ActivatedRoute, Params } from '@angular/router';
+import { GameActions } from '../game/game.actions';
+import { Store } from '@ngrx/store';
+import { selectRouteParams } from '../router/router.selectors';
+import { ROUTER_NAVIGATION, ROUTER_REQUEST } from '@ngrx/router-store';
 
 @Injectable()
-export class GameEffects {
+export class GameDetailsEffects {
   constructor(
     private actions$: Actions,
     private httpService: HttpService,
-    private snackbar: MatSnackBar
+    private snackbar: MatSnackBar,
+    private activatedRoute: ActivatedRoute,
+    private store: Store
   ) {}
 
   loadGameDetails$ = createEffect(() =>
@@ -28,6 +35,19 @@ export class GameEffects {
           )
         )
       )
+    )
+  );
+  loadDetails$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(ROUTER_NAVIGATION),
+      concatLatestFrom(() => this.store.select(selectRouteParams)),
+      // tap(([action, routeParams]) => {
+      //   console.log('Route Params:', routeParams);
+      // }),
+      map(([action, routeParams]) => ({ action, gameId: routeParams['id'] })),
+      mergeMap(({ action, gameId }) => {
+        return of(GameDetailsActions.loadGameDetails({ id: gameId }));
+      })
     )
   );
 }

@@ -5,59 +5,38 @@ import {
   GameDetailsApiActions,
 } from './game-details.actions';
 
-export const GAME_DETAILS_FEATURE_KEY = 'video-game';
+export const GAME_DETAILS_FEATURE_KEY = 'gameDetails';
 
 export interface GameDetailsState {
-  games: Game[];
   loading: boolean;
-  error: any;
-  sortCriteria: string;
-  totalGames: number;
-  details: DetailsState;
-  pageSize: number;
-  currentPage: number;
-}
-export interface DetailsState {
-  game: Game | null;
+  error: null;
+  gameRating: number;
+  gameDetails: Game | null;
 }
 
 const initialState: GameDetailsState = {
-  games: [],
   loading: false,
   error: null,
-  sortCriteria: '',
-  totalGames: 0,
-  details: {
-    game: null,
-  },
-  pageSize: 10,
-  currentPage: 0,
+  gameRating: 0,
+  gameDetails: null,
 };
 
-export const gameReducer = createReducer(
+export const gameDetailsReducer = createReducer(
   initialState,
 
   on(GameDetailsActions.loadGameDetails, (state) => ({
     ...state,
     loading: true,
-    details: {
-      ...state.details,
-    },
   })),
   on(GameDetailsApiActions.loadGameDetailsSuccess, (state, { game }) => ({
     ...state,
     loading: false,
-    details: {
-      ...state.details,
-      game,
-    },
+    gameDetails: game,
+    gameRating: game.metacritic,
   })),
   on(GameDetailsApiActions.loadGameDetailsFailure, (state, { error }) => ({
     ...state,
     loading: false,
-    details: {
-      ...state.details,
-      error,
-    },
+    error,
   }))
 );

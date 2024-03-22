@@ -27,7 +27,7 @@ const initialState: GameState = {
   details: {
     game: null,
   },
-  pageSize: 10,
+  pageSize: 20,
   currentPage: 0,
 };
 
@@ -48,6 +48,10 @@ export const gameReducer = createReducer(
     ...state,
     loading: false,
     error,
+  })),
+  on(GameActions.nextPage, (state) => ({
+    ...state,
+    loading: true,
   })),
 
   on(GameActions.setPageSize, (state, { pageSize }) => ({
@@ -86,28 +90,28 @@ export const gameReducer = createReducer(
     ...state,
     loading: false,
     error,
-  })),
-  on(GameActions.loadGameDetails, (state) => ({
-    ...state,
-    loading: true,
-    details: {
-      ...state.details,
-    },
-  })),
-  on(GameApiActions.loadGameDetailsSuccess, (state, { game }) => ({
-    ...state,
-    loading: false,
-    details: {
-      ...state.details,
-      game,
-    },
-  })),
-  on(GameApiActions.loadGameDetailsFailure, (state, { error }) => ({
-    ...state,
-    loading: false,
-    details: {
-      ...state.details,
-      error,
-    },
   }))
+  // on(GameActions.loadGameDetails, (state) => ({
+  //   ...state,
+  //   loading: true,
+  //   details: {
+  //     ...state.details,
+  //   },
+  // })),
+  // on(GameApiActions.loadGameDetailsSuccess, (state, { game }) => ({
+  //   ...state,
+  //   loading: false,
+  //   details: {
+  //     ...state.details,
+  //     game,
+  //   },
+  // })),
+  // on(GameApiActions.loadGameDetailsFailure, (state, { error }) => ({
+  //   ...state,
+  //   loading: false,
+  //   details: {
+  //     ...state.details,
+  //     error,
+  //   },
+  // }))
 );
