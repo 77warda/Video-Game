@@ -17,7 +17,7 @@ export const GameActions = createActionGroup({
       search?: string;
     }>(),
     'Set Page Size': props<{ pageSize: number }>(),
-    'Set Current Page': props<{ currentPage: number }>(),
+    // 'Set Current Page': props<{ currentPage: number }>(),
     'Next page': emptyProps(),
     'Next page loading': emptyProps(),
     'Next page loading Complete': emptyProps(),

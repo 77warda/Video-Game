@@ -10,10 +10,9 @@ import { GameActions } from '../+state/game/game.actions';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
 })
-export class HomeComponent implements OnInit, OnDestroy {
-  public currentPage!: number;
+export class HomeComponent implements OnInit {
   public sort = 'metacrit';
-  private routeSub: Subscription | undefined;
+  // private routeSub: Subscription | undefined;
 
   allGamesData$!: Observable<any>;
 
@@ -25,12 +24,13 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.allGamesData$ = this.store.pipe(select(selectAllGamesData));
-    // this.currentPage$.subscribe((games) => {
-    //   console.log('page current:', games);
-    // });
+    this.allGamesData$.subscribe((games) => {
+      console.log('page current:', games);
+    });
+    // ==========
     // this.routeSub = this.activatedRoute.params.subscribe((params: Params) => {
-    //   const page = params['page'];
-    //   this.currentPage = page ? +page : 1;
+    //   // const page = params['page'];
+    //   // this.currentPage = page ? +page : 1;
     //   if (params['game-search']) {
     //     this.searchGames('metacrit', params['game-search']);
     //   } else {
@@ -40,38 +40,38 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   pageChanged(event: any): void {
-    this.currentPage = event.pageIndex + 1;
+    const currentPage = event.pageIndex + 1;
     this.store.dispatch(GameActions.nextPage());
 
-    this.activatedRoute.paramMap
-      .pipe(map((params) => params.get('game-search')))
-      .subscribe((searchParam) => {
-        if (searchParam) {
-          this.router.navigate([], {
-            relativeTo: this.activatedRoute,
-            queryParams: {
-              page: this.currentPage,
-              gameSearch: searchParam,
-            },
-            queryParamsHandling: 'merge',
-          });
+    // this.activatedRoute.paramMap
+    //   .pipe(map((params) => params.get('game-search')))
+    //   .subscribe((searchParam) => {
+    //     if (searchParam) {
+    //       this.router.navigate([], {
+    //         relativeTo: this.activatedRoute,
+    //         queryParams: {
+    //           page: currentPage,
+    //           gameSearch: searchParam,
+    //         },
+    //         queryParamsHandling: 'merge',
+    //       });
 
-          this.store.dispatch(
-            GameActions.getGames({
-              sort: this.sort,
-              currentPage: this.currentPage,
-              search: searchParam,
-            })
-          );
-        } else {
-          this.store.dispatch(
-            GameActions.getGames({
-              sort: this.sort,
-              currentPage: this.currentPage,
-            })
-          );
-        }
-      });
+    //       this.store.dispatch(
+    //         GameActions.getGames({
+    //           sort: this.sort,
+    //           currentPage: currentPage,
+    //           search: searchParam,
+    //         })
+    //       );
+    //     } else {
+    //       this.store.dispatch(
+    //         GameActions.getGames({
+    //           sort: this.sort,
+    //           currentPage: currentPage,
+    //         })
+    //       );
+    //     }
+    //   });
   }
 
   // searchGames(sort: string, search?: string): void {
@@ -86,9 +86,9 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.router.navigate(['details', id]);
   }
 
-  ngOnDestroy(): void {
-    if (this.routeSub) {
-      this.routeSub.unsubscribe();
-    }
-  }
+  // ngOnDestroy(): void {
+  //   if (this.routeSub) {
+  //     this.routeSub.unsubscribe();
+  //   }
+  // }
 }

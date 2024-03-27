@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Actions, concatLatestFrom, createEffect, ofType } from '@ngrx/effects';
-import { mergeMap, map, catchError, tap } from 'rxjs/operators';
+import { mergeMap, map, catchError, tap, filter } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { HttpService } from '../../services/http.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -12,7 +12,12 @@ import { ActivatedRoute, Params } from '@angular/router';
 import { GameActions } from '../game/game.actions';
 import { Store } from '@ngrx/store';
 import { selectRouteParams } from '../router/router.selectors';
-import { ROUTER_NAVIGATION, ROUTER_REQUEST } from '@ngrx/router-store';
+import {
+  ROUTER_NAVIGATION,
+  ROUTER_REQUEST,
+  RouterNavigatedAction,
+  routerNavigatedAction,
+} from '@ngrx/router-store';
 
 @Injectable()
 export class GameDetailsEffects {
@@ -40,6 +45,9 @@ export class GameDetailsEffects {
   loadDetails$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ROUTER_NAVIGATION),
+      filter((action: RouterNavigatedAction) =>
+        action.payload.routerState.url.startsWith('/details')
+      ),
       concatLatestFrom(() => this.store.select(selectRouteParams)),
       // tap(([action, routeParams]) => {
       //   console.log('Route Params:', routeParams);

@@ -45,5 +45,12 @@ export const selectAllGamesData = createSelector(
   selectLoading,
   selectTotalItems,
   selectPageSize,
-  (games, loading, total, pageSize) => ({ games, loading, total, pageSize })
+  selectCurrentPage,
+  (games, loading, total, pageSize, currentPage) => ({
+    games,
+    loading,
+    total,
+    pageSize,
+    currentPage,
+  })
 );

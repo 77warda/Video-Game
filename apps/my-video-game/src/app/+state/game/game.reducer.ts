@@ -52,16 +52,17 @@ export const gameReducer = createReducer(
   on(GameActions.nextPage, (state) => ({
     ...state,
     loading: true,
+    currentPage: state.currentPage + 1,
   })),
 
   on(GameActions.setPageSize, (state, { pageSize }) => ({
     ...state,
     pageSize,
   })),
-  on(GameActions.setCurrentPage, (state, { currentPage }) => ({
-    ...state,
-    currentPage: currentPage,
-  })),
+  // on(GameActions.setCurrentPage, (state, { currentPage }) => ({
+  //   ...state,
+  //   currentPage: currentPage + 1,
+  // })),
   // on(GameActions.searchGames, (state) => ({ ...state, loading: true })),
   on(GameApiActions.searchGamesSuccess, (state, { games, count }) => ({
     ...state,
@@ -91,27 +92,4 @@ export const gameReducer = createReducer(
     loading: false,
     error,
   }))
-  // on(GameActions.loadGameDetails, (state) => ({
-  //   ...state,
-  //   loading: true,
-  //   details: {
-  //     ...state.details,
-  //   },
-  // })),
-  // on(GameApiActions.loadGameDetailsSuccess, (state, { game }) => ({
-  //   ...state,
-  //   loading: false,
-  //   details: {
-  //     ...state.details,
-  //     game,
-  //   },
-  // })),
-  // on(GameApiActions.loadGameDetailsFailure, (state, { error }) => ({
-  //   ...state,
-  //   loading: false,
-  //   details: {
-  //     ...state.details,
-  //     error,
-  //   },
-  // }))
 );
