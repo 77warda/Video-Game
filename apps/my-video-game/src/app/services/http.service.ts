@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { forkJoin, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { forkJoin, Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { environment as env } from '../environments/environment';
 import { APIResponse, Game } from '../models';
 
@@ -32,13 +32,30 @@ export class HttpService {
   }
 
   getGameDetails(id: string): Observable<Game> {
-    const gameInfoRequest = this.http.get(`${env.BASE_URL}/games/${id}`);
-    const gameTrailersRequest = this.http.get(
-      `${env.BASE_URL}/games/${id}/movies`
+    const gameInfoRequest = this.http.get(`${env.BASE_URL}/games/${id}`).pipe(
+      catchError((error) => {
+        console.error('Error fetching game info:', error);
+        return of(null);
+      })
     );
-    const gameScreenshotsRequest = this.http.get(
-      `${env.BASE_URL}/games/${id}/screenshots`
-    );
+
+    const gameTrailersRequest = this.http
+      .get(`${env.BASE_URL}/games/${id}/movies`)
+      .pipe(
+        catchError((error) => {
+          console.error('Error fetching game trailers:', error);
+          return of(null);
+        })
+      );
+
+    const gameScreenshotsRequest = this.http
+      .get(`${env.BASE_URL}/games/${id}/screenshots`)
+      .pipe(
+        catchError((error) => {
+          console.error('Error fetching game screenshots:', error);
+          return of(null);
+        })
+      );
 
     return forkJoin({
       gameInfoRequest,
@@ -51,6 +68,11 @@ export class HttpService {
           screenshots: resp['gameScreenshotsRequest']?.results,
           trailers: resp['gameTrailersRequest']?.results,
         };
+      }),
+      catchError((error) => {
+        // Handle error if needed
+        console.error('Error in forkJoin:', error);
+        throw error;
       })
     );
   }

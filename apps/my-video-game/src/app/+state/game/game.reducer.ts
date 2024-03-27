@@ -36,6 +36,7 @@ export const gameReducer = createReducer(
   on(GameActions.loadGames, GameActions.searchGames, (state) => ({
     ...state,
     loading: true,
+    currentPage: 0,
   })),
   on(GameApiActions.loadGameSuccess, (state, { games, count }) => ({
     ...state,
