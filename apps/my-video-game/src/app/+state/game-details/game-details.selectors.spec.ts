@@ -1,66 +1,64 @@
-import { GameGameEntity } from './game/game.models';
+import { Game } from '../../models';
 import {
-  gameGameAdapter,
-  GameGamePartialState,
-  initialGameGameState,
-} from './game/game.reducer';
-import * as GameGameSelectors from './game/game.selectors';
+  GAME_DETAILS_FEATURE_KEY,
+  GameDetailsState,
+} from './game-details.reducer';
+import {
+  selectAllGameDetailsData,
+  selectGameDetails,
+  selectLoading,
+} from './game-details.selectors';
 
-describe('GameGame Selectors', () => {
-  const ERROR_MSG = 'No Error Available';
-  const getGameGameId = (it: GameGameEntity) => it.id;
-  const createGameGameEntity = (id: string, name = '') =>
-    ({
-      id,
-      name: name || `name-${id}`,
-    } as GameGameEntity);
+describe('Game Selectors', () => {
+  const mockGame: Game = {
+    id: '1',
+    background_image: 'image_url_1',
+    name: 'Mock Game 1',
+    released: '2023-01-01',
+    metacritic_url: 'metacritic_url_1',
+    website: 'website_url_1',
+    description: 'This is a mock game description.',
+    metacritic: 80,
+    genres: [{ name: 'Action' }, { name: 'Adventure' }],
+    parent_platforms: [
+      { platform: { name: 'PC', slug: 'pc' } },
+      { platform: { name: 'PlayStation', slug: 'playstation' } },
+    ],
+    publishers: [{ name: 'Publisher A' }, { name: 'Publisher B' }],
+    ratings: [
+      { id: 1, count: 100, title: 'Excellent' },
+      { id: 2, count: 50, title: 'Good' },
+    ],
+    screenshots: [{ image: 'screenshot_url_1' }, { image: 'screenshot_url_2' }],
+    trailers: [
+      { data: { max: 'trailer_url_1' } },
+      { data: { max: 'trailer_url_2' } },
+    ],
+  };
 
-  let state: GameGamePartialState;
+  const mockState: GameDetailsState = {
+    loading: false,
+    error: null,
+    gameRating: 30,
+    gameDetails: mockGame,
+  };
 
-  beforeEach(() => {
-    state = {
-      gameGame: gameGameAdapter.setAll(
-        [
-          createGameGameEntity('PRODUCT-AAA'),
-          createGameGameEntity('PRODUCT-BBB'),
-          createGameGameEntity('PRODUCT-CCC'),
-        ],
-        {
-          ...initialGameGameState,
-          selectedId: 'PRODUCT-BBB',
-          error: ERROR_MSG,
-          loaded: true,
-        }
-      ),
-    };
+  const mockRootState = {
+    [GAME_DETAILS_FEATURE_KEY]: mockState as GameDetailsState,
+  };
+
+  it('should select the game Details', () => {
+    const result = selectGameDetails(mockRootState);
+    expect(result).toEqual(mockGame);
+  });
+  it('should select the loading state', () => {
+    const loadingResult = selectLoading(mockRootState);
+    expect(loadingResult).toEqual(false);
   });
 
-  describe('GameGame Selectors', () => {
-    it('getAllGameGame() should return the list of GameGame', () => {
-      const results = GameGameSelectors.getAllGameGame(state);
-      const selId = getGameGameId(results[1]);
-
-      expect(results.length).toBe(3);
-      expect(selId).toBe('PRODUCT-BBB');
-    });
-
-    it('getSelected() should return the selected Entity', () => {
-      const result = GameGameSelectors.getSelected(state) as GameGameEntity;
-      const selId = getGameGameId(result);
-
-      expect(selId).toBe('PRODUCT-BBB');
-    });
-
-    it('getGameGameLoaded() should return the current "loaded" status', () => {
-      const result = GameGameSelectors.getGameGameLoaded(state);
-
-      expect(result).toBe(true);
-    });
-
-    it('getGameGameError() should return the current "error" state', () => {
-      const result = GameGameSelectors.getGameGameError(state);
-
-      expect(result).toBe(ERROR_MSG);
-    });
+  it('should select all game details data', () => {
+    const allGameData = selectAllGameDetailsData(mockRootState);
+    expect(allGameData.gameDetail).toEqual(mockGame);
+    expect(allGameData.loading).toEqual(false);
   });
 });

@@ -8,16 +8,10 @@ import {
   GameDetailsActions,
   GameDetailsApiActions,
 } from './game-details.actions';
-import { ActivatedRoute, Params } from '@angular/router';
-import { GameActions } from '../game/game.actions';
+import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { selectRouteParams } from '../router/router.selectors';
-import {
-  ROUTER_NAVIGATION,
-  ROUTER_REQUEST,
-  RouterNavigatedAction,
-  routerNavigatedAction,
-} from '@ngrx/router-store';
+import { ROUTER_NAVIGATION, RouterNavigatedAction } from '@ngrx/router-store';
 
 @Injectable()
 export class GameDetailsEffects {
@@ -49,9 +43,6 @@ export class GameDetailsEffects {
         action.payload.routerState.url.startsWith('/details')
       ),
       concatLatestFrom(() => this.store.select(selectRouteParams)),
-      // tap(([action, routeParams]) => {
-      //   console.log('Route Params:', routeParams);
-      // }),
       map(([action, routeParams]) => ({ action, gameId: routeParams['id'] })),
       mergeMap(({ action, gameId }) => {
         return of(GameDetailsActions.loadGameDetails({ id: gameId }));

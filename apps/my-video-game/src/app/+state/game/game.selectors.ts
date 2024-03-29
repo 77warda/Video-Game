@@ -19,13 +19,6 @@ export const selectError = createSelector(
   (state: GameState) => state.error
 );
 
-// export const selectGameDetails = createSelector(
-//   selectGameState,
-//   (state: GameState) => {
-//     console.log(state.details);
-//     return state.details.game;
-//   }
-// );
 export const selectTotalItems = createSelector(selectGameState, (state) => {
   console.log('count', state?.totalGames);
   return state?.totalGames;

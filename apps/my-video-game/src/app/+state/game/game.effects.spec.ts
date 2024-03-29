@@ -1,39 +1,295 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed, fakeAsync } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
-import { Action } from '@ngrx/store';
-import { provideMockStore } from '@ngrx/store/testing';
+import { Action, Store, StoreModule } from '@ngrx/store';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { hot } from 'jasmine-marbles';
-import { Observable } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
+import { GameActions, GameApiActions } from './game.actions';
 
-import * as GameGameActions from './game/game.actions';
-import { GameGameEffects } from './game/game.effects';
+import { GameEffects } from './game.effects';
+import { HttpService } from '../../services/http.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { APIResponse, Game } from '../../models';
+import { ofType } from '@ngrx/effects';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { RouterTestingModule } from '@angular/router/testing';
+import { HomeComponent } from '../../home/home.component';
+import { ROUTER_NAVIGATION } from '@ngrx/router-store';
 
-describe('GameGameEffects', () => {
-  let actions: Observable<Action>;
-  let effects: GameGameEffects;
+describe('GameEffects', () => {
+  let actions$: Observable<any>;
+  let effects: GameEffects;
+  let httpService: HttpService;
+  let snackbar: any;
+  let store: MockStore;
+  let mockGames: Game[];
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [],
+      imports: [
+        RouterTestingModule,
+        RouterTestingModule.withRoutes([
+          { path: 'search', component: HomeComponent },
+        ]),
+        StoreModule.forRoot({}),
+        HttpClientTestingModule,
+      ],
       providers: [
-        GameGameEffects,
-        provideMockActions(() => actions),
+        GameEffects,
+        provideMockActions(() => actions$),
         provideMockStore(),
+        HttpService,
+        { provide: MatSnackBar, useValue: snackbar },
       ],
     });
 
-    effects = TestBed.inject(GameGameEffects);
+    effects = TestBed.inject(GameEffects);
+    store = TestBed.inject(MockStore);
+    httpService = TestBed.inject(HttpService);
+    snackbar = TestBed.inject(MatSnackBar);
+
+    mockGames = [
+      {
+        id: '1',
+        background_image: 'image_url_1',
+        name: 'Mock Game 1',
+        released: '2023-01-01',
+        metacritic_url: 'metacritic_url_1',
+        website: 'website_url_1',
+        description: 'This is a mock game description.',
+        metacritic: 80,
+        genres: [{ name: 'Action' }, { name: 'Adventure' }],
+        parent_platforms: [
+          { platform: { name: 'PC', slug: 'pc' } },
+          { platform: { name: 'PlayStation', slug: 'playstation' } },
+        ],
+        publishers: [{ name: 'Publisher A' }, { name: 'Publisher B' }],
+        ratings: [
+          { id: 1, count: 100, title: 'Excellent' },
+          { id: 2, count: 50, title: 'Good' },
+        ],
+        screenshots: [
+          { image: 'screenshot_url_1' },
+          { image: 'screenshot_url_2' },
+        ],
+        trailers: [
+          { data: { max: 'trailer_url_1' } },
+          { data: { max: 'trailer_url_2' } },
+        ],
+      },
+    ];
   });
 
-  describe('init$', () => {
-    it('should work', () => {
-      actions = hot('-a-|', { a: GameGameActions.initGameGame() });
+  describe('All Effects included here', () => {
+    it('should be created', () => {
+      expect(effects).toBeTruthy();
+    });
+    describe('load Games Effect$', () => {
+      it('should dispatch loadGameSuccess action on successful API call', () => {
+        const gameList: Game[] = mockGames;
+        const count = 2;
+        const response: APIResponse<Game> = { results: gameList, count };
 
-      const expected = hot('-a-|', {
-        a: GameGameActions.loadGameGameSuccess({ gameGame: [] }),
+        const action = GameActions.loadGames();
+        const completion = GameApiActions.loadGameSuccess({
+          games: gameList,
+          count,
+        });
+
+        actions$ = of(action);
+        const getGameListSpy = jest
+          .spyOn(httpService, 'getGameList')
+          .mockReturnValue(of(response));
+
+        effects.loadGames$.subscribe((resultAction) => {
+          expect(resultAction).toEqual(completion);
+          expect(getGameListSpy).toHaveBeenCalled();
+        });
+      });
+      it('should dispatch loadGameFailure action on API call error', () => {
+        const error = new Error('Failed to load games');
+
+        const action = GameActions.loadGames();
+        const completion = GameApiActions.loadGameFailure({ error });
+
+        actions$ = of(action);
+        const getGameListSpy = jest
+          .spyOn(httpService, 'getGameList')
+          .mockReturnValue(throwError(error));
+
+        effects.loadGames$.subscribe((resultAction) => {
+          expect(resultAction).toEqual(completion);
+          expect(getGameListSpy).toHaveBeenCalled();
+        });
+      });
+    });
+    describe('Get Games Effects', () => {
+      it('should return a loadGameSuccess action on successful API call', () => {
+        const mockSort = 'metacrit';
+        const mockCurrentPage = 1;
+        const mockSearch = 'keyword';
+        const mockResponse: APIResponse<Game> = {
+          results: mockGames,
+          count: 1,
+        };
+
+        const mockAction = GameActions.getGames({
+          sort: mockSort,
+          currentPage: mockCurrentPage,
+          search: mockSearch,
+        });
+        const expectedAction = GameApiActions.loadGameSuccess({
+          games: mockResponse.results,
+          count: mockResponse.count,
+        });
+
+        actions$ = of(mockAction);
+        httpService.getGameList = jest.fn(() => of(mockResponse));
+
+        effects.getGames$.subscribe((resultAction) => {
+          expect(resultAction).toEqual(expectedAction);
+        });
       });
 
-      expect(effects.init$).toBeObservable(expected);
+      it('should return a loadGameFailure action on API call error', () => {
+        const mockSort = 'metacrit';
+        const mockCurrentPage = 1;
+        const mockSearch = 'keyword';
+        const mockError = new Error('Failed to load games');
+
+        const mockAction = GameActions.getGames({
+          sort: mockSort,
+          currentPage: mockCurrentPage,
+          search: mockSearch,
+        });
+        const expectedAction = GameApiActions.loadGameFailure({
+          error: mockError,
+        });
+
+        actions$ = of(mockAction);
+        httpService.getGameList = jest.fn(() => throwError(mockError));
+
+        effects.getGames$.subscribe((resultAction) => {
+          expect(resultAction).toEqual(expectedAction);
+        });
+      });
+    });
+    describe('Search games Effects', () => {
+      it('should return a searchGamesSuccess action on successful API call', () => {
+        const mockSort = 'metacrit';
+        const mockSearch = 'keyword';
+        const mockResponse: APIResponse<Game> = {
+          results: mockGames,
+          count: 1,
+        };
+
+        const mockAction = GameActions.searchGames({
+          sort: mockSort,
+          search: mockSearch,
+        });
+        const expectedAction = GameApiActions.searchGamesSuccess({
+          games: mockResponse.results,
+          count: mockResponse.count,
+        });
+
+        actions$ = of(mockAction);
+        httpService.getGameList = jest.fn(() => of(mockResponse));
+
+        effects.searchGames$.subscribe((resultAction) => {
+          expect(resultAction).toEqual(expectedAction);
+        });
+      });
+
+      it('should return a searchGamesFailure action on API call error', () => {
+        const mockSort = 'metacrit';
+        const mockSearch = 'keyword';
+        const mockError = new Error('Failed to search games');
+
+        const mockAction = GameActions.searchGames({
+          sort: mockSort,
+          search: mockSearch,
+        });
+        const expectedAction = GameApiActions.searchGamesFailure({
+          error: mockError,
+        });
+
+        actions$ = of(mockAction);
+        httpService.getGameList = jest.fn(() => throwError(mockError));
+
+        effects.searchGames$.subscribe((resultAction) => {
+          expect(resultAction).toEqual(expectedAction);
+        });
+      });
+    });
+    describe('Sort games Effects', () => {
+      it('should return a sortGamesSuccess action on successful API call', () => {
+        const mockSort = 'metacrit';
+        const mockResponse: APIResponse<Game> = {
+          results: mockGames,
+          count: 1,
+        };
+
+        const mockAction = GameActions.sortGames({ sort: mockSort });
+        const expectedAction = GameApiActions.sortGamesSuccess({
+          games: mockResponse.results,
+          count: mockResponse.count,
+        });
+
+        actions$ = of(mockAction);
+        httpService.getGameList = jest.fn(() => of(mockResponse));
+
+        effects.sortGames$.subscribe((resultAction) => {
+          expect(resultAction).toEqual(expectedAction);
+        });
+      });
+
+      it('should return a sortGamesFailure action on API call error', () => {
+        const mockSort = 'metacrit';
+        const mockError = new Error('Failed to sort games');
+
+        const mockAction = GameActions.sortGames({ sort: mockSort });
+        const expectedAction = GameApiActions.sortGamesFailure({
+          error: mockError,
+        });
+
+        actions$ = of(mockAction);
+        httpService.getGameList = jest.fn(() => throwError(mockError));
+
+        effects.sortGames$.subscribe((resultAction) => {
+          expect(resultAction).toEqual(expectedAction);
+        });
+      });
+    });
+    describe('handle error Effects', () => {
+      it('should open a snackbar with the correct error message when a loadGameFailure action occurs', () => {
+        const mockAction = GameApiActions.loadGameFailure({
+          error: new Error('Failed to load games'),
+        });
+
+        actions$ = of(mockAction);
+
+        effects.handleError$.subscribe(() => {
+          expect(snackbar.open).toHaveBeenCalledWith(
+            'Games Loaded Failure',
+            'Close'
+          );
+        });
+      });
+    });
+    describe('Load games router (navigation) Effects', () => {
+      it('should dispatch loadGames action when ROUTER_NAVIGATION event occurs with a valid URL', () => {
+        const mockRouterAction = {
+          type: ROUTER_NAVIGATION,
+          payload: {
+            routerState: { url: '/games' },
+          },
+        };
+        const mockAction = GameActions.loadGames();
+        actions$ = of(mockRouterAction);
+        effects.loadGamesRouter$.subscribe((resultAction) => {
+          expect(resultAction).toEqual(mockAction);
+        });
+      });
     });
   });
 });

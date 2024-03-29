@@ -14,7 +14,7 @@ export interface GameDetailsState {
   gameDetails: Game | null;
 }
 
-const initialState: GameDetailsState = {
+export const initialState: GameDetailsState = {
   loading: false,
   error: null,
   gameRating: 0,

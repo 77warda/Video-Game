@@ -9,7 +9,6 @@ export const GameActions = createActionGroup({
     'Load Games': emptyProps(),
     'Search Games': props<{ sort: string; search?: string }>(),
     'Sort Games': props<{ sort: string }>(),
-    // 'Load Game Details': props<{ id: string }>(),
     'Previous Page': emptyProps(),
     'Get Games': props<{
       sort: string;
@@ -17,7 +16,6 @@ export const GameActions = createActionGroup({
       search?: string;
     }>(),
     'Set Page Size': props<{ pageSize: number }>(),
-    // 'Set Current Page': props<{ currentPage: number }>(),
     'Next page': emptyProps(),
     'Next page loading': emptyProps(),
     'Next page loading Complete': emptyProps(),

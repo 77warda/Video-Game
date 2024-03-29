@@ -11,7 +11,6 @@ export const selectGameDetailsState = createFeatureSelector<GameDetailsState>(
 export const selectGameDetails = createSelector(
   selectGameDetailsState,
   (state: GameDetailsState) => {
-    console.log(state);
     return state.gameDetails;
   }
 );

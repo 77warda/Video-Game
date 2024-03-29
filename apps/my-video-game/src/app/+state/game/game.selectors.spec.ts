@@ -1,66 +1,100 @@
-import { GameGameEntity } from './game/game.models';
+import { Game } from '../../models';
+import { GAME_FEATURE_KEY, GameState, initialState } from './game.reducer';
 import {
-  gameGameAdapter,
-  GameGamePartialState,
-  initialGameGameState,
-} from './game/game.reducer';
-import * as GameGameSelectors from './game/game.selectors';
+  selectAllGamesData,
+  selectCurrentPage,
+  selectError,
+  selectGameState,
+  selectGames,
+  selectLoading,
+  selectPageSize,
+  selectTotalItems,
+} from './game.selectors';
 
-describe('GameGame Selectors', () => {
-  const ERROR_MSG = 'No Error Available';
-  const getGameGameId = (it: GameGameEntity) => it.id;
-  const createGameGameEntity = (id: string, name = '') =>
-    ({
-      id,
-      name: name || `name-${id}`,
-    } as GameGameEntity);
+describe('Game Selectors', () => {
+  const mockGame: Game = {
+    id: '1',
+    background_image: 'image_url_1',
+    name: 'Mock Game 1',
+    released: '2023-01-01',
+    metacritic_url: 'metacritic_url_1',
+    website: 'website_url_1',
+    description: 'This is a mock game description.',
+    metacritic: 80,
+    genres: [{ name: 'Action' }, { name: 'Adventure' }],
+    parent_platforms: [
+      { platform: { name: 'PC', slug: 'pc' } },
+      { platform: { name: 'PlayStation', slug: 'playstation' } },
+    ],
+    publishers: [{ name: 'Publisher A' }, { name: 'Publisher B' }],
+    ratings: [
+      { id: 1, count: 100, title: 'Excellent' },
+      { id: 2, count: 50, title: 'Good' },
+    ],
+    screenshots: [{ image: 'screenshot_url_1' }, { image: 'screenshot_url_2' }],
+    trailers: [
+      { data: { max: 'trailer_url_1' } },
+      { data: { max: 'trailer_url_2' } },
+    ],
+  };
 
-  let state: GameGamePartialState;
+  const mockState: GameState = {
+    games: [mockGame],
+    loading: true,
+    error: 'Error message',
+    sortCriteria: 'metacrit',
+    totalGames: 10,
+    pageSize: 20,
+    currentPage: 1,
+  };
 
-  beforeEach(() => {
-    state = {
-      gameGame: gameGameAdapter.setAll(
-        [
-          createGameGameEntity('PRODUCT-AAA'),
-          createGameGameEntity('PRODUCT-BBB'),
-          createGameGameEntity('PRODUCT-CCC'),
-        ],
-        {
-          ...initialGameGameState,
-          selectedId: 'PRODUCT-BBB',
-          error: ERROR_MSG,
-          loaded: true,
-        }
-      ),
-    };
+  const mockRootState = {
+    [GAME_FEATURE_KEY]: mockState as GameState,
+  };
+
+  it('should select the game state', () => {
+    const result = selectGameState(mockRootState);
+    expect(result).toEqual(mockState);
   });
 
-  describe('GameGame Selectors', () => {
-    it('getAllGameGame() should return the list of GameGame', () => {
-      const results = GameGameSelectors.getAllGameGame(state);
-      const selId = getGameGameId(results[1]);
+  it('should select the games', () => {
+    const result = selectGames(mockRootState);
+    expect(result).toEqual([mockGame]);
+  });
 
-      expect(results.length).toBe(3);
-      expect(selId).toBe('PRODUCT-BBB');
-    });
+  it('should select the loading state', () => {
+    const result = selectLoading(mockRootState);
+    expect(result).toEqual(true);
+  });
 
-    it('getSelected() should return the selected Entity', () => {
-      const result = GameGameSelectors.getSelected(state) as GameGameEntity;
-      const selId = getGameGameId(result);
+  it('should select the error state', () => {
+    const result = selectError(mockRootState);
+    expect(result).toEqual('Error message');
+  });
 
-      expect(selId).toBe('PRODUCT-BBB');
-    });
+  it('should select the total items', () => {
+    const result = selectTotalItems(mockRootState);
+    expect(result).toEqual(10);
+  });
 
-    it('getGameGameLoaded() should return the current "loaded" status', () => {
-      const result = GameGameSelectors.getGameGameLoaded(state);
+  it('should select the page size', () => {
+    const result = selectPageSize(mockRootState);
+    expect(result).toEqual(20);
+  });
 
-      expect(result).toBe(true);
-    });
+  it('should select the current page', () => {
+    const result = selectCurrentPage(mockRootState);
+    expect(result).toEqual(1);
+  });
 
-    it('getGameGameError() should return the current "error" state', () => {
-      const result = GameGameSelectors.getGameGameError(state);
-
-      expect(result).toBe(ERROR_MSG);
+  it('should select all games data', () => {
+    const result = selectAllGamesData(mockRootState);
+    expect(result).toEqual({
+      games: [mockGame],
+      loading: true,
+      total: 10,
+      pageSize: 20,
+      currentPage: 1,
     });
   });
 });

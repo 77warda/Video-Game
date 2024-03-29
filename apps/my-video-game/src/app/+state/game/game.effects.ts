@@ -64,7 +64,7 @@ export class GameEffects {
             return GameActions.getGames({
               sort: 'metacrit',
               currentPage: nextPage,
-              search: searchParam, // Retain the search parameter
+              search: searchParam,
             });
           })
         );
@@ -149,9 +149,6 @@ export class GameEffects {
         action.payload.routerState.url.startsWith('/search')
       ),
       concatLatestFrom(() => this.store.select(selectRouteParams)),
-      tap(([action, routeParams]) => {
-        console.log('Routed:', routeParams);
-      }),
       distinctUntilChanged((prev, curr) => {
         console.log('prev', prev[1]);
         console.log('current', curr[1]);

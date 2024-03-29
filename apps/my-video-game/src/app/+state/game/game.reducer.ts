@@ -10,23 +10,16 @@ export interface GameState {
   error: any;
   sortCriteria: string;
   totalGames: number;
-  details: DetailsState;
   pageSize: number;
   currentPage: number;
 }
-export interface DetailsState {
-  game: Game | null;
-}
 
-const initialState: GameState = {
+export const initialState: GameState = {
   games: [],
   loading: false,
   error: null,
   sortCriteria: '',
   totalGames: 0,
-  details: {
-    game: null,
-  },
   pageSize: 20,
   currentPage: 0,
 };
@@ -60,11 +53,6 @@ export const gameReducer = createReducer(
     ...state,
     pageSize,
   })),
-  // on(GameActions.setCurrentPage, (state, { currentPage }) => ({
-  //   ...state,
-  //   currentPage: currentPage + 1,
-  // })),
-  // on(GameActions.searchGames, (state) => ({ ...state, loading: true })),
   on(GameApiActions.searchGamesSuccess, (state, { games, count }) => ({
     ...state,
     games,
