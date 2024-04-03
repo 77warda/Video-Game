@@ -47,6 +47,13 @@ describe('GameDetailsReducer', () => {
 
     expect(action.id).toBe('1');
   });
+  it('should set loading to true on loadGameDetails action', () => {
+    const action = GameDetailsActions.loadGameDetails({
+      id: mockGameDetails.id,
+    });
+    const newState = gameDetailsReducer(initialState, action);
+    expect(newState.loading).toBe(true);
+  });
   it('should set loading to false and update gameDetails and gameRating on loadGameDetailsSuccess action', () => {
     const action = GameDetailsApiActions.loadGameDetailsSuccess({
       game: mockGameDetails,

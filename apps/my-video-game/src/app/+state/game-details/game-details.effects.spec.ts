@@ -51,10 +51,10 @@ describe('GameEffects', () => {
   });
 
   describe('All Effects included here', () => {
-    let mockGameDetails: any;
+    let mockGameDetail: any;
     let mockError: any;
     beforeEach(() => {
-      (mockGameDetails = {
+      (mockGameDetail = {
         id: '1',
         background_image: 'image_url_1',
         name: 'Mock Game 1',
@@ -87,30 +87,42 @@ describe('GameEffects', () => {
     it('should be created', () => {
       expect(effects).toBeTruthy();
     });
-    describe('loadGame$ Router (navigation) Effects', () => {
-      it('should dispatch loadGameDetails action when navigation to /details', fakeAsync(() => {
-        const mockParams = { id: '1' };
-        const mockAction = {
-          payload: {
-            routerState: {
-              url: '/details',
-              params: mockParams,
-            },
-          },
-        };
+    describe('loadDetails$ Effect', () => {
+      it('should load Categories successfully', fakeAsync(() => {
+        const game = mockGameDetail;
+        const action = GameDetailsActions.loadGameDetails({ id: '1' });
+        jest.spyOn(httpService, 'getGameDetails').mockReturnValue(of(game));
 
-        const expectedAction = GameDetailsActions.loadGameDetails({
-          id: '1',
-        });
+        actions$ = of(action);
+        const expected = GameDetailsApiActions.loadGameDetailsSuccess({ game });
 
-        actions$ = of(mockAction as any);
-
-        effects.loadDetails$.subscribe((resultAction) => {
-          expect(resultAction).toEqual(expectedAction);
+        effects.loadGameDetails$.subscribe((result) => {
+          expect(result).toEqual(expected);
         });
         flush();
       }));
+      it('should handle errors when loading categories', fakeAsync(() => {
+        const error = new Error('Failed to load categories');
+        const action = GameDetailsActions.loadGameDetails({ id: '1' });
+        const state = { quizApp: { categories: {} } };
+        actions$ = of(action);
+        store.setState(state);
+        jest
+          .spyOn(httpService, 'getGameDetails')
+          .mockReturnValue(throwError(error));
 
+        const expected = GameDetailsApiActions.loadGameDetailsFailure({
+          error,
+        });
+
+        effects.loadGameDetails$.subscribe((result) => {
+          expect(result).toEqual(expected);
+        });
+        flush();
+      }));
+    });
+
+    describe('loadDetails$ Router (navigation) Effects', () => {
       it('should not dispatch loadGameDetails action for other routes', fakeAsync(() => {
         const mockParams = { id: '1' };
         const mockAction = {
@@ -122,14 +134,53 @@ describe('GameEffects', () => {
           },
         };
 
-        const expectedAction = GameDetailsActions.loadGameDetails({
-          id: '1',
+        actions$ = of(mockAction as any);
+
+        effects.loadDetails$.subscribe((resultAction) => {
+          expect(resultAction).toBeFalsy();
         });
+        flush();
+      }));
+
+      it('should dispatch loadGameDetails action with correct id when navigating to /details/:id', fakeAsync(() => {
+        const mockParams = { id: '2' };
+        const mockAction = {
+          payload: {
+            routerState: {
+              url: '/details/2',
+              params: mockParams,
+            },
+          },
+        };
+
+        const expectedAction = GameDetailsActions.loadGameDetails({ id: '2' });
 
         actions$ = of(mockAction as any);
 
         effects.loadDetails$.subscribe((resultAction) => {
-          expect(resultAction).not.toEqual(expectedAction);
+          expect(resultAction).toEqual(expectedAction);
+        });
+        flush();
+      }));
+
+      it('should dispatch loadGameDetails action when navigation to /details', fakeAsync(() => {
+        const mockParams = { id: '1' };
+        const mockAction = {
+          payload: {
+            routerState: {
+              url: '/details',
+              params: mockParams,
+            },
+          },
+        };
+
+        const expectedAction = GameDetailsActions.loadGameDetails({ id: '1' });
+
+        actions$ = of(mockAction as any);
+        jest.spyOn(store, 'select').mockReturnValue(of(mockParams));
+
+        effects.loadDetails$.subscribe((resultAction) => {
+          expect(resultAction).toEqual(expectedAction);
         });
         flush();
       }));

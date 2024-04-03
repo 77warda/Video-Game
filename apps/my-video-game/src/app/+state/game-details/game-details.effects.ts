@@ -18,8 +18,6 @@ export class GameDetailsEffects {
   constructor(
     private actions$: Actions,
     private httpService: HttpService,
-    private snackbar: MatSnackBar,
-    private activatedRoute: ActivatedRoute,
     private store: Store
   ) {}
 

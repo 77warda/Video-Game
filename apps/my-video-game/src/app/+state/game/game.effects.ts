@@ -150,8 +150,6 @@ export class GameEffects {
       ),
       concatLatestFrom(() => this.store.select(selectRouteParams)),
       distinctUntilChanged((prev, curr) => {
-        console.log('prev', prev[1]);
-        console.log('current', curr[1]);
         return prev[1]['game-search'] === curr[1]['game-search'];
       }),
       mergeMap(([_, routeParams]) =>
