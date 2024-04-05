@@ -17,8 +17,6 @@ export const GameActions = createActionGroup({
     }>(),
     'Set Page Size': props<{ pageSize: number }>(),
     'Next page': emptyProps(),
-    'Next page loading': emptyProps(),
-    'Next page loading Complete': emptyProps(),
   },
 });
 
@@ -31,7 +29,5 @@ export const GameApiActions = createActionGroup({
     'search games Failure': props<{ error: any }>(),
     'sort games Success': props<{ games: Game[]; count: number }>(),
     'sort games Failure': props<{ error: any }>(),
-    'Next Page Success': props<{ games: Game[]; count: number }>(),
-    'Next Page Failure': props<{ error: any }>(),
   },
 });

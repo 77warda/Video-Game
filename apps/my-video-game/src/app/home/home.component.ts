@@ -4,6 +4,7 @@ import { Observable, Subscription, map } from 'rxjs';
 import { Store, select } from '@ngrx/store';
 import { selectAllGamesData } from '../+state/game/game.selectors';
 import { GameActions } from '../+state/game/game.actions';
+import { FascadePatternService } from '../services/fascade-pattern.service';
 
 @Component({
   selector: 'video-game-db-home',
@@ -14,21 +15,36 @@ export class HomeComponent implements OnInit {
   public sort = 'metacrit';
   allGamesData$!: Observable<any>;
 
-  constructor(private router: Router, private store: Store) {}
+  constructor(
+    private router: Router,
+    private store: Store,
+    private gameFacade: FascadePatternService
+  ) {}
 
+  // ngOnInit(): void {
+  //   this.allGamesData$ = this.store.pipe(select(selectAllGamesData));
+  //   // this.allGamesData$.subscribe((games) => {
+  //   //   console.log('page current:', games);
+  //   // });
+  // }
+
+  // pageChanged(event: any): void {
+  //   this.store.dispatch(GameActions.nextPage());
+  // }
+
+  // sortGames(sort: string): void {
+  //   this.store.dispatch(GameActions.sortGames({ sort }));
+  // }
   ngOnInit(): void {
-    this.allGamesData$ = this.store.pipe(select(selectAllGamesData));
-    // this.allGamesData$.subscribe((games) => {
-    //   console.log('page current:', games);
-    // });
+    this.allGamesData$ = this.gameFacade.getAllGamesData();
   }
 
   pageChanged(event: any): void {
-    this.store.dispatch(GameActions.nextPage());
+    this.gameFacade.nextPage();
   }
 
   sortGames(sort: string): void {
-    this.store.dispatch(GameActions.sortGames({ sort }));
+    this.gameFacade.sortGames(sort);
   }
 
   openGameDetails(id: string): void {

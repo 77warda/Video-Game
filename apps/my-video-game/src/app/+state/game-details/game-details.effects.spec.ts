@@ -17,6 +17,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { HomeComponent } from '../../home/home.component';
 import { ROUTER_NAVIGATION } from '@ngrx/router-store';
 import { GameDetailsEffects } from './game-details.effects';
+import { selectRouteParams } from '../router/router.selectors';
 
 describe('GameEffects', () => {
   let actions$: Observable<any>;
