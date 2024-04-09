@@ -18,7 +18,11 @@ import { APIResponse, Game } from '../../models';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Store, select } from '@ngrx/store';
 import { selectRouteParams } from '../router/router.selectors';
-import { ROUTER_NAVIGATION, RouterNavigatedAction } from '@ngrx/router-store';
+import {
+  ROUTER_NAVIGATED,
+  ROUTER_NAVIGATION,
+  RouterNavigatedAction,
+} from '@ngrx/router-store';
 import { selectCurrentPage, selectPageSize } from './game.selectors';
 
 @Injectable()
@@ -46,7 +50,7 @@ export class GameEffects {
 
   searchGamesRouter$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(ROUTER_NAVIGATION),
+      ofType(ROUTER_NAVIGATED),
       filter((action: RouterNavigatedAction) =>
         action.payload.routerState.url.startsWith('/search')
       ),
@@ -148,11 +152,11 @@ export class GameEffects {
   searchGames$ = createEffect(() =>
     this.actions$.pipe(
       ofType(GameActions.searchGames),
-      withLatestFrom(
+      concatLatestFrom(() => [
         this.store.pipe(select(selectCurrentPage)),
-        this.store.pipe(select(selectPageSize))
-      ),
-      mergeMap(([action, currentPage, pageSize]) =>
+        this.store.pipe(select(selectPageSize)),
+      ]),
+      concatMap(([action, currentPage, pageSize]) =>
         this.httpService
           .getGameList(action.sort, currentPage + 1, pageSize, action.search)
           .pipe(
@@ -174,21 +178,24 @@ export class GameEffects {
   nextPage$ = createEffect(() =>
     this.actions$.pipe(
       ofType(GameActions.nextPage),
-      concatMap(() => {
-        return this.store.pipe(
-          select(selectCurrentPage),
-          take(1),
-          withLatestFrom(this.store.pipe(select(selectRouteParams))),
-          map(([currentPage, routeParams]) => {
-            const nextPage = currentPage + 1;
-            const searchParam = routeParams['game-search'];
-            return GameActions.getGames({
-              sort: 'metacrit',
-              currentPage: nextPage,
-              search: searchParam,
-            });
-          })
-        );
+      concatLatestFrom(() => [
+        this.store.select(selectCurrentPage),
+        this.store.select(selectRouteParams),
+      ]),
+      tap(console.log),
+      map(([action, currentPageIdx, routeParams]) => ({
+        currentPage: currentPageIdx + 1,
+        search: routeParams['game-search'],
+      })),
+      tap(console.log),
+      concatMap(({ currentPage, search }) => {
+        return [
+          GameActions.getGames({
+            sort: 'metacrit',
+            currentPage,
+            search,
+          }),
+        ];
       })
     )
   );

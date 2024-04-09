@@ -11,13 +11,16 @@ import {
 import { HttpService } from '../../services/http.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { APIResponse, Game } from '../../models';
-import { ofType } from '@ngrx/effects';
+import { concatLatestFrom, ofType } from '@ngrx/effects';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { HomeComponent } from '../../home/home.component';
-import { ROUTER_NAVIGATION } from '@ngrx/router-store';
+import { ROUTER_NAVIGATED, ROUTER_NAVIGATION } from '@ngrx/router-store';
 import { GameDetailsEffects } from './game-details.effects';
-import { selectRouteParams } from '../router/router.selectors';
+import { selectRouteParams, selectUrl } from '../router/router.selectors';
+import { initialState } from './game-details.reducer';
+import { selectCurrentPage, selectPageSize } from '../game/game.selectors';
+import { RouterNavigatedAction } from '@ngrx/router-store';
 
 describe('GameEffects', () => {
   let actions$: Observable<any>;
@@ -39,7 +42,28 @@ describe('GameEffects', () => {
       providers: [
         GameDetailsEffects,
         provideMockActions(() => actions$),
-        provideMockStore(),
+        provideMockStore({
+          selectors: [
+            {
+              selector: selectRouteParams,
+              value: {
+                'game-search': '',
+              },
+            },
+            {
+              selector: selectUrl,
+              value: '/',
+            },
+            {
+              selector: selectPageSize,
+              value: 20,
+            },
+            {
+              selector: selectCurrentPage,
+              value: 1,
+            },
+          ],
+        }),
         HttpService,
         { provide: MatSnackBar, useValue: snackbar },
       ],
@@ -124,67 +148,62 @@ describe('GameEffects', () => {
     });
 
     describe('loadDetails$ Router (navigation) Effects', () => {
-      it('should not dispatch loadGameDetails action for other routes', fakeAsync(() => {
+      it('should dispatch details using queryparams', fakeAsync(() => {
         const mockParams = { id: '1' };
-        const mockAction = {
-          payload: {
-            routerState: {
-              url: '/search',
-              params: mockParams,
-            },
-          },
-        };
+        store.overrideSelector(selectRouteParams, {
+          url: '/details/1',
+          params: mockParams,
+        });
 
-        actions$ = of(mockAction as any);
-
-        effects.loadDetails$.subscribe((resultAction) => {
-          expect(resultAction).toBeFalsy();
+        actions$ = of({ type: ROUTER_NAVIGATED });
+        effects.loadDetails$.subscribe((action) => {
+          expect(action).toEqual(
+            GameDetailsActions.loadGameDetails({ id: mockParams.id })
+          );
         });
         flush();
       }));
 
-      it('should dispatch loadGameDetails action with correct id when navigating to /details/:id', fakeAsync(() => {
-        const mockParams = { id: '2' };
-        const mockAction = {
-          payload: {
-            routerState: {
-              url: '/details/2',
-              params: mockParams,
-            },
-          },
-        };
-
-        const expectedAction = GameDetailsActions.loadGameDetails({ id: '2' });
-
-        actions$ = of(mockAction as any);
-
-        effects.loadDetails$.subscribe((resultAction) => {
-          expect(resultAction).toEqual(expectedAction);
-        });
-        flush();
-      }));
-
-      it('should dispatch loadGameDetails action when navigation to /details', fakeAsync(() => {
+      it('should dispatch details using queryParams', () => {
         const mockParams = { id: '1' };
-        const mockAction = {
+        const routerAction = {
+          type: ROUTER_NAVIGATED,
           payload: {
-            routerState: {
-              url: '/details',
-              params: mockParams,
-            },
+            routerState: { url: '/details/1' },
           },
-        };
+        } as RouterNavigatedAction<any>;
 
-        const expectedAction = GameDetailsActions.loadGameDetails({ id: '1' });
+        actions$ = of(routerAction);
 
-        actions$ = of(mockAction as any);
-        jest.spyOn(store, 'select').mockReturnValue(of(mockParams));
+        store.overrideSelector(selectRouteParams, mockParams);
 
-        effects.loadDetails$.subscribe((resultAction) => {
-          expect(resultAction).toEqual(expectedAction);
-        });
-        flush();
-      }));
+        const dispatchSpy = jest.spyOn(store, 'dispatch');
+
+        effects.loadDetails$.subscribe();
+
+        expect(dispatchSpy).toHaveBeenCalledWith(
+          GameDetailsActions.loadGameDetails({ id: '1' })
+        );
+      });
+
+      it('should not dispatch details if URL does not start with /details', () => {
+        const routerAction = {
+          type: ROUTER_NAVIGATED,
+          payload: {
+            routerState: { url: '/' },
+          },
+        } as RouterNavigatedAction<any>;
+
+        actions$ = of(routerAction);
+
+        store.overrideSelector(selectRouteParams, { id: '1' });
+
+        const dispatchSpy = jest.spyOn(store, 'dispatch');
+
+        effects.loadDetails$.subscribe();
+
+        expect(dispatchSpy).not.toHaveBeenCalled();
+      });
     });
   });
 });

@@ -1,4 +1,4 @@
-import { TestBed, fakeAsync } from '@angular/core/testing';
+import { TestBed, fakeAsync, flush } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { Action, Store, StoreModule } from '@ngrx/store';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
@@ -14,7 +14,12 @@ import { ofType } from '@ngrx/effects';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { HomeComponent } from '../../home/home.component';
-import { ROUTER_NAVIGATION } from '@ngrx/router-store';
+import {
+  ROUTER_NAVIGATED,
+  ROUTER_NAVIGATION,
+  RouterNavigatedAction,
+} from '@ngrx/router-store';
+import { selectRouteParams } from '../router/router.selectors';
 
 describe('GameEffects', () => {
   let actions$: Observable<any>;
@@ -290,6 +295,200 @@ describe('GameEffects', () => {
           expect(resultAction).toEqual(mockAction);
         });
       });
+    });
+    describe('search game router (navugation)', () => {
+      it('should dispatch search games using queryparams', fakeAsync(() => {
+        const mockParams = { sort: 'metacrit' };
+        store.overrideSelector(selectRouteParams, {
+          url: '/search',
+          params: mockParams,
+        });
+
+        actions$ = of({ type: ROUTER_NAVIGATED });
+        effects.searchGamesRouter$.subscribe((action) => {
+          expect(action).toEqual(GameActions.searchGames({ sort: 'metacrit' }));
+        });
+        flush();
+      }));
+      it('should dispatch search games using override selectors', () => {
+        const mockParams = { sort: 'metacrit' };
+        const routerAction = {
+          type: ROUTER_NAVIGATED,
+          payload: {
+            routerState: { url: '/search' },
+          },
+        } as RouterNavigatedAction<any>;
+
+        actions$ = of(routerAction);
+
+        store.overrideSelector(selectRouteParams, mockParams);
+
+        const dispatchSpy = jest.spyOn(store, 'dispatch');
+
+        effects.searchGamesRouter$.subscribe();
+
+        expect(dispatchSpy).toHaveBeenCalledWith(
+          GameActions.searchGames({ sort: 'metacrit' })
+        );
+      });
+
+      it('should not dispatch search games if URL does not start with /search', () => {
+        const routerAction = {
+          type: ROUTER_NAVIGATED,
+          payload: {
+            routerState: { url: '/' },
+          },
+        } as RouterNavigatedAction<any>;
+
+        actions$ = of(routerAction);
+
+        store.overrideSelector(selectRouteParams, { sort: 'metacrit' });
+
+        const dispatchSpy = jest.spyOn(store, 'dispatch');
+
+        effects.searchGamesRouter$.subscribe();
+
+        expect(dispatchSpy).not.toHaveBeenCalled();
+      });
+
+      it('should dispatch search games only when route params change', () => {
+        const mockParams1 = { sort: 'metacrit', 'game-search': 'test1' };
+        const mockParams2 = { sort: 'metacrit', 'game-search': 'test2' };
+
+        const routerAction1 = {
+          type: ROUTER_NAVIGATED,
+          payload: {
+            routerState: { url: '/search' },
+          },
+        } as RouterNavigatedAction<any>;
+
+        const routerAction2 = {
+          type: ROUTER_NAVIGATED,
+          payload: {
+            routerState: { url: '/search' },
+          },
+        } as RouterNavigatedAction<any>;
+
+        actions$ = of(routerAction1, routerAction2);
+
+        store.overrideSelector(selectRouteParams, mockParams1);
+
+        const dispatchSpy = jest.spyOn(store, 'dispatch');
+
+        effects.searchGamesRouter$.subscribe();
+        store.overrideSelector(selectRouteParams, mockParams2);
+        effects.searchGamesRouter$.subscribe();
+
+        expect(dispatchSpy).toHaveBeenCalledTimes(2);
+
+        // Reset dispatch spy and selector value
+        jest.clearAllMocks();
+        store.overrideSelector(selectRouteParams, mockParams2);
+
+        effects.searchGamesRouter$.subscribe();
+        expect(dispatchSpy).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('Page Changing router (navugation)', () => {
+      it('should dispatch getGames action with page when page route param exists', fakeAsync(() => {
+        const mockParams = { page: '2', 'game-search': 'test' };
+        const routerAction = {
+          type: ROUTER_NAVIGATION,
+          payload: {
+            routerState: { url: '/games', root: { queryParams: mockParams } },
+          },
+        };
+
+        actions$ = of(routerAction);
+
+        store.overrideSelector(selectRouteParams, mockParams);
+
+        const dispatchSpy = jest.spyOn(store, 'dispatch');
+
+        effects.changePageRouter$.subscribe();
+
+        expect(dispatchSpy).toHaveBeenCalledWith(
+          GameActions.getGames({
+            sort: 'metacrit',
+            currentPage: 2,
+            search: 'test',
+          })
+        );
+      }));
+
+      it('should dispatch getGames action without page when page route param is not present', fakeAsync(() => {
+        const mockParams = { 'game-search': 'test' };
+        const routerAction = {
+          type: ROUTER_NAVIGATION,
+          payload: {
+            routerState: { url: '/games', root: { queryParams: mockParams } },
+          },
+        };
+
+        actions$ = of(routerAction);
+
+        store.overrideSelector(selectRouteParams, mockParams);
+
+        const dispatchSpy = jest.spyOn(store, 'dispatch');
+
+        effects.changePageRouter$.subscribe();
+
+        expect(dispatchSpy).toHaveBeenCalledWith(
+          GameActions.getGames({
+            sort: 'metacrit',
+            currentPage: 1,
+            search: 'test',
+          })
+        );
+      }));
+
+      it('should not dispatch getGames action if page route param is not present', fakeAsync(() => {
+        const mockParams = { 'game-search': 'test' };
+        const routerAction = {
+          type: ROUTER_NAVIGATION,
+          payload: {
+            routerState: { url: '/' },
+          },
+        };
+
+        actions$ = of(routerAction);
+
+        store.overrideSelector(selectRouteParams, mockParams);
+
+        const dispatchSpy = jest.spyOn(store, 'dispatch');
+
+        effects.changePageRouter$.subscribe();
+
+        expect(dispatchSpy).not.toHaveBeenCalled();
+      }));
+
+      it('should not dispatch getGames action if page route param remains unchanged', fakeAsync(() => {
+        const mockParams = { page: '2', 'game-search': 'test' };
+        const routerAction1 = {
+          type: ROUTER_NAVIGATION,
+          payload: {
+            routerState: { url: '/games', root: { queryParams: mockParams } },
+          },
+        };
+
+        const routerAction2 = {
+          type: ROUTER_NAVIGATION,
+          payload: {
+            routerState: { url: '/games', root: { queryParams: mockParams } },
+          },
+        };
+
+        actions$ = of(routerAction1, routerAction2);
+
+        store.overrideSelector(selectRouteParams, mockParams);
+
+        const dispatchSpy = jest.spyOn(store, 'dispatch');
+
+        effects.changePageRouter$.subscribe();
+
+        expect(dispatchSpy).toHaveBeenCalledTimes(1); // Expect only one dispatch since page param remains unchanged
+      }));
     });
   });
 });

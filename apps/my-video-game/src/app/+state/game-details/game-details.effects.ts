@@ -11,7 +11,11 @@ import {
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { selectRouteParams } from '../router/router.selectors';
-import { ROUTER_NAVIGATION, RouterNavigatedAction } from '@ngrx/router-store';
+import {
+  ROUTER_NAVIGATED,
+  ROUTER_NAVIGATION,
+  RouterNavigatedAction,
+} from '@ngrx/router-store';
 
 @Injectable()
 export class GameDetailsEffects {
@@ -36,7 +40,7 @@ export class GameDetailsEffects {
   );
   loadDetails$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(ROUTER_NAVIGATION),
+      ofType(ROUTER_NAVIGATED),
       filter((action: RouterNavigatedAction) =>
         action.payload.routerState.url.startsWith('/details')
       ),
